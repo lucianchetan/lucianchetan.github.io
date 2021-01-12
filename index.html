@@ -2,11 +2,11 @@
 
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script lang="javascript">
+    <script lang="text/javascript">
         var DB_URL = 'db.html';
         $(document).ready(function () {
             $.get(DB_URL, function (data) {
-                console.log(data);
+                console.log(typeof data);
                 //     var fileDom = $(data);
                 //     fileDom.find('h2').each(function () {
                 //         alert($(this).text());
