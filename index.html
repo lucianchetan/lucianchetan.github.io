@@ -1,23 +1,145 @@
+<!DOCTYPE html>
 <html>
 
 <head>
+    <title>FR-RO Dictionary</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <style>
+        html * {
+            font-family: "Arial";
+        }
+
+        #dictionary {
+            display: none;
+        }
+
+        #searchInput {
+            font-size: large;
+        }
+
+        #resultList {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            padding-top: 10px;
+            padding-bottom: 20px;
+            text-indent: -1em;
+            padding-left: 1em;
+        }
+
+        b.term {
+            /* color: dodgerblue; */
+            text-decoration: underline;
+        }
+
+        #resultCountLabel {
+            font-size: small;
+        }
+    </style>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <script lang="text/javascript">
-        var DB_URL = 'db.html';
+        const definitions = new Map();
+
+        let termRegex = /^<B>(?<term>[\wçñàâäãéêèëîïôóöûùüæœÉ().,;'’/\-\s~!]*)<\/B>.*/;
+
         $(document).ready(function () {
-            $.get(DB_URL, function (data) {
-                console.log(typeof data);
-                //     var fileDom = $(data);
-                //     fileDom.find('h2').each(function () {
-                //         alert($(this).text());
-                //     });
+            if (window.location.href.endsWith("?dictionary")) {
+                $('#dictionary').show();
+            } else {
+                $('body').empty();
+            }
+
+            $.get('db.html', function (data) {
+                let lines = data.split(/\n/);
+                console.log("Definitions: " + lines.length);
+
+                lines.forEach((line, index) => {
+                    let match = termRegex.exec(line);
+                    if (match != null) {
+                        let term = match[1];
+                        var defs = definitions.get(term);
+                        if (defs === undefined) {
+                            defs = [];
+                            definitions.set(term, defs);
+                        }
+                        defs.push(line.replace("<B>", "<B class='term'>"));
+                    }
+                });
             });
         });
+
+        function normalize(input) {
+            return input
+                .replaceAll('æ', 'ae')
+                .replaceAll('œ', 'oe')
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
+        }
+
+        function search() {
+            $('#resultList').empty();
+            $('#resultArea').empty();
+
+            let searchText = $('#searchInput').val();
+            let searchInsideDefinitions = $('#searchInsideDefinitionsCheckBox').is(':checked');
+
+            if (searchText.length >= 2) {
+                var resultCount = 0;
+                let normalizedSearchText = normalize(searchText);
+                definitions.forEach((defs, term, map) => {
+                    var found = false;
+                    if (searchInsideDefinitions) {
+                        for (var i = 0; i < defs.length; i++) {
+                            let def = defs[i];
+                            let normalizedDef = normalize(def);
+                            if (normalizedDef.includes(normalizedSearchText)) {
+                                found = true;
+                            }
+                            if (found) {
+                                break;
+                            }
+                        }
+                    } else {
+                        let normalizedTerm = normalize(term);
+                        found = normalizedTerm.startsWith(searchText);
+                    }
+
+                    if (found) {
+                        resultCount++;
+                        defs.forEach((def, index) => {
+                            $('#resultList').append(`<li>${def}</li>`);
+                        });
+                    }
+                });
+                $('#resultCountLabel').text(`${resultCount} results`);
+            } else {
+                $('#resultCountLabel').text('No results');
+            }
+        }
     </script>
 </head>
 
 <body>
+    <div id="dictionary">
+        <input id="searchInput" onchange="search()" />
 
+        <input id="searchInsideDefinitionsCheckBox" type="checkbox" name="searchInsideDefinitionsCheckBox"
+            onchange="search()" />
+        <label for="searchInsideDefinitionsCheckBox">Search inside definitions</label><br>
+
+        <label id="resultCountLabel">Type to search...</label>
+
+        <hr />
+
+        <ul id="resultList"></ul>
+    </div>
 </body>
 
 </html>
