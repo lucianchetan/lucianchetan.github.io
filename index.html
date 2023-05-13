@@ -4,23 +4,48 @@
 <head>
     <title>FR-RO Dictionary</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        html * {
-            font-family: "Arial";
-        }
-
-        #dictionary {
+        #app {
             display: none;
         }
 
+        html * {
+            font-family: "Inter";
+        }
+
+        body {
+            display: flex;
+            align-items: stretch;
+            gap: 0px;
+
+            margin: 0;
+            height: 100vh;
+        }
+
+        #dictionary {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            align-items: stretch;
+        }
+
+        #searchArea {
+            padding: 8px;
+            background-color: #EEE;
+        }
+
         #searchInput {
-            font-size: large;
+            font-size: x-large;
         }
 
         #resultList {
+            overflow-y: auto;
             list-style-type: none;
-            padding: 0;
+            padding: 8px;
             margin: 0;
         }
 
@@ -38,6 +63,28 @@
 
         #resultCountLabel {
             font-size: small;
+            opacity: 0.5;
+        }
+
+        /**/
+        #searchHistory {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            min-width: 200px;
+            max-width: 200px;
+            padding: 8px;
+            background-color: #EEEEEE;
+        }
+
+        #searchHistoryList {
+            flex-grow: 1;
+        }
+
+        option {
+            padding: 4px;
+            font-size: medium;
         }
     </style>
 
@@ -45,14 +92,15 @@
 
     <script lang="text/javascript">
         const definitions = new Map();
+        const searchTextHistory = new Array();
 
         let termRegex = /^<B>(?<term>[\wçñàâäãéêèëîïôóöûùüæœÉ().,;'’/\-\s~!]*)<\/B>.*/;
 
         $(document).ready(function () {
             if (window.location.href.endsWith("?dictionary")) {
-                $('#dictionary').show();
+                $('html').show();
             } else {
-                $('body').empty();
+                $('html').empty();
             }
 
             $.get('db.html', function (data) {
@@ -83,7 +131,7 @@
                 .toLowerCase();
         }
 
-        function search() {
+        function search(shouldUpdateHistory) {
             $('#resultList').empty();
             $('#resultArea').empty();
 
@@ -91,8 +139,13 @@
             let searchInsideDefinitions = $('#searchInsideDefinitionsCheckBox').is(':checked');
 
             if (searchText.length >= 2) {
+                if (shouldUpdateHistory) {
+                    addToHistory(searchText);
+                }
+
                 var resultCount = 0;
                 let normalizedSearchText = normalize(searchText);
+
                 definitions.forEach((defs, term, map) => {
                     var found = false;
                     if (searchInsideDefinitions) {
@@ -108,7 +161,7 @@
                         }
                     } else {
                         let normalizedTerm = normalize(term);
-                        found = normalizedTerm.startsWith(searchText);
+                        found = normalizedTerm.startsWith(normalizedSearchText);
                     }
 
                     if (found) {
@@ -123,22 +176,52 @@
                 $('#resultCountLabel').text('No results');
             }
         }
+
+        function addToHistory(item) {
+            var itemIndex = searchTextHistory.indexOf(item);
+            if (itemIndex >= 0) {
+                console.log("Removing item from history", item, itemIndex, searchTextHistory);
+                searchTextHistory.splice(itemIndex, 1);
+                $("#searchHistoryList > option:nth-child(" + (itemIndex + 1) + ")").remove();
+            }
+
+            searchTextHistory.unshift(item);
+            $("#searchHistoryList").prepend("<option>" + item + "</option>");
+            $("#searchHistoryList").val([item]);
+        }
+
+        function clearHistory() {
+            searchTextHistory.splice(0, searchTextHistory.length);
+            $("#searchHistoryList").empty();
+        }
+
+        function loadSearchText() {
+            let selectedSearchText = $("#searchHistoryList").val()[0];
+            if (selectedSearchText) {
+                $("#searchInput").val(selectedSearchText);
+                search(false);
+            }
+        }
     </script>
 </head>
 
 <body>
     <div id="dictionary">
-        <input id="searchInput" onchange="search()" />
+        <div id="searchArea">
+            <input id="searchInput" type="text" onchange="search(true)" />
+            <input id="searchInsideDefinitionsCheckBox" type="checkbox" name="searchInsideDefinitionsCheckBox"
+                onchange="search()" />
+            <label for="searchInsideDefinitionsCheckBox">Search inside definitions</label><br>
 
-        <input id="searchInsideDefinitionsCheckBox" type="checkbox" name="searchInsideDefinitionsCheckBox"
-            onchange="search()" />
-        <label for="searchInsideDefinitionsCheckBox">Search inside definitions</label><br>
-
-        <label id="resultCountLabel">Type to search...</label>
-
-        <hr />
+            <label id="resultCountLabel">Type to search...</label>
+        </div>
 
         <ul id="resultList"></ul>
+    </div>
+    <div id="searchHistory">
+        <button onclick="clearHistory()">Clear History</button>
+        <select id="searchHistoryList" multiple onchange="loadSearchText()">
+        </select>
     </div>
 </body>
 
