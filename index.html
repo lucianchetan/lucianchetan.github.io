@@ -94,7 +94,7 @@
         const definitions = new Map();
         const searchTextHistory = new Array();
 
-        let termRegex = /^<B>(?<term>[\wçñàâäãéêèëîïôóöûùüæœÉ().,;'’/\-\s~!]*)<\/B>.*/;
+        let termRegex = /^<B>(?<term>[\wçñàâäãéêèëîïôóöûùüæœÉ\*().,;'’/\-\s~!]*)<\/B>.*/;
 
         $(document).ready(function () {
             if (window.location.href.endsWith("?dictionary")) {
@@ -103,21 +103,24 @@
                 $('html').empty();
             }
 
-            $.get('db.html', function (data) {
-                let lines = data.split(/\n/);
-                console.log("Definitions: " + lines.length);
+            ['abc', 'def', 'g_i', 'h', 'jkl', 'mno', 'pqr', 'stu', 'vwxyz'].forEach(group => {
+                let file = '_' + group + '.html';
+                $.get(file, function (data) {
+                    let lines = data.split(/\n/);
 
-                lines.forEach((line, index) => {
-                    let match = termRegex.exec(line);
-                    if (match != null) {
-                        let term = match[1];
-                        var defs = definitions.get(term);
-                        if (defs === undefined) {
-                            defs = [];
-                            definitions.set(term, defs);
+                    lines.forEach((line, index) => {
+                        let match = termRegex.exec(line);
+                        if (match != null) {
+                            let term = match[1];
+                            var defs = definitions.get(term);
+                            if (defs === undefined) {
+                                defs = [];
+                                definitions.set(term, defs);
+                            }
+                            defs.push(line.replace("<B>", "<B class='term'>"));
                         }
-                        defs.push(line.replace("<B>", "<B class='term'>"));
-                    }
+                    });
+                    console.log(`Loaded ${lines.length} definitions from ${file}`);
                 });
             });
         });
