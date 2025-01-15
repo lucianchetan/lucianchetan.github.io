@@ -97,7 +97,7 @@
         let termRegex = /^<B>(?<term>[\wçñàâäãéêèëîïôóöûùüæœÉ\*().,;'’/\-\s~!]*)<\/B>.*/;
 
         $(document).ready(function () {
-            if (window.location.href.startsWith("?dictionary")) {
+            if (window.location.href.endsWith("?dictionary")) {
                 $('html').show();
             } else {
                 $('html').empty();
