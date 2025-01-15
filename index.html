@@ -97,7 +97,7 @@
         let termRegex = /^<B>(?<term>[\wçñàâäãéêèëîïôóöûùüæœÉ\*().,;'’/\-\s~!]*)<\/B>.*/;
 
         $(document).ready(function () {
-            if (window.location.href.endsWith("?dictionary")) {
+            if (window.location.href.contains("?dictionary")) {
                 $('html').show();
             } else {
                 $('html').empty();
@@ -107,11 +107,13 @@
                 let file = group + '.html';
                 $.get(file, function (data) {
                     let lines = data.split(/\n/);
+                    let terms = [];
 
                     lines.forEach((line, index) => {
                         let match = termRegex.exec(line);
                         if (match != null) {
                             let term = match[1];
+                            terms.push(term);
                             var defs = definitions.get(term);
                             if (defs === undefined) {
                                 defs = [];
@@ -120,7 +122,8 @@
                             defs.push(line.replace("<B>", "<B class='term'>"));
                         }
                     });
-                    console.log(`Loaded ${lines.length} definitions from ${file}`);
+
+                    console.log(`Loaded ${lines.length} definitions from ${file}`, terms);
                 });
             });
         });
