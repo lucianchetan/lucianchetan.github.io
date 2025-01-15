@@ -1,5 +1,5 @@
-<B>h, h </B> <I>s.m. </I> litera H, h.
-<B>*ha! </B>I. <I>interj. </I> <B>1. </B>(varianta învechită a lui <I>ah!) </I> (exprimă surprinderea); ~ <B>vous étiez là? </B>Ah, erai aici? 2. (exprimă uşurarea) <B>il est enfin parti </B>ah, bine că a plecat. 3. (repetat, imită râsul) <B>ce qu'il peut être drôle </B>Ha, ha, ce caraghios e! II. <I>s.m. invar. </I> 1. ha, ha (hohot de râs). <B>2. </B>(exprimă uşurarea) ; <B>pousser un ~ de soulagement </B>a răsufla uşurat.
+<B>H, h </B> <I>s.m. </I> litera H, h.
+<B>*ha! </B>I. <I>interj. </I> <B>1. </B>(varianta învechită a lui <I>ah!) </I> (exprimă surprinderea); <B>~ vous étiez là? </B>Ah, erai aici? 2. (exprimă uşurarea) <B>il est enfin parti </B>ah, bine că a plecat. 3. (repetat, imită râsul) <B>ce qu'il peut être drôle </B>Ha, ha, ce caraghios e! II. <I>s.m. invar. </I> 1. ha, ha (hohot de râs). <B>2. </B>(exprimă uşurarea) ; <B>pousser un ~ de soulagement </B>a răsufla uşurat.
 <B>*habanera </B> <I>s.f. (cor., muz.) </I> habaneră.
 <B>habeas corpus </B> <I>s.m. </I> habeas corpus, lege engleză votată în 1679.
 <B>habile </B> <I>adj. </I> 1. abil, îndemânatic, ingenios, iscusit, meşter, priceput, <B>un menuisier très ~</B> un tâmplar foarte priceput; <B>politicien ~</B> politician abil. <B>2. </B>abil, şiret, şmecher; ~ <B>courtisan </B>curtean şiret. 3. <I>(jur. cu prep. </I> <B>à) </B> apt de a...; <B>~ à succéder </B>apt de a succeda. <B>4. </B>abil, inteligent, bine făcut; <B>un film ~</B> un film bine făcut
@@ -18,7 +18,7 @@
 <B>habitabilité </B> <I>s.f. </I> <B>1. </B>calitatea unei locuinţe, condiţiile pe care le oferă; <B>l'~ d'une villa </B>condiţiile de locuit ale unei vile. 2. posibilitatea de a încăpea într-un vehicul.
 <B>habitable </B> <I>adj. </I> locuibil, unde se poate locui; <B>cet appartement est ~</B> acest apartament este locuibil.
 <B>habitacle </B> <I>s.m. </I> <B>1. </B> <I>(poet.) </I> locaş, cămin, sălaş. <B>2. </B> <I>(av.) </I> parte dintr-un avion rezervată pilotului şi echipajului. <B>3. </B> <I>(mar.) </I> habitaclu <B>/ </B>locul busolei pe niavă.
-<B>habitant, ~e </B> <I>s.m.f. </I> <B>1. </B>locuitor; <B>les ~s d'un pays </B> locuitorii unei ţări. <B>2. </B>localnic; <B>trouver une chambre chez l'~</B>a găsi o cameră la un localnic. <B>3. </B> <I>(în expr.) </I> <B>les ~s des forêts </B>animalele unei păduri; <B>les ~s de l' Olympe </B>zeii din Olimp; <I>(pop.) </I> <B>avoir des -s </B>a avea păduchi. <br>
+<B>habitant, ~e </B> <I>s.m.f. </I> <B>1. </B>locuitor; <B>les ~s d'un pays </B> locuitorii unei ţări. <B>2. </B>localnic; <B>trouver une chambre chez l'~</B>a găsi o cameră la un localnic. <B>3. </B> <I>(în expr.) </I> <B>les ~s des forêts </B>animalele unei păduri; <B>les ~s de l' Olympe </B>zeii din Olimp; <I>(pop.) </I> <B>avoir des -s </B>a avea păduchi.
 <B>habitat </B> <I>s.m. 1. </I> habitat, suprafaţă locuită de o populaţie, de o specie de animale sau de plante; sălaş; <B>la jungle est l'~ du tigre </B>jungla este sălaşul tigrului. <B>2. </B>aşezare; ~ <B>urbain </B>aşezare urbană. <B>3. </B>ansamblul condiţiilor de locuit; <B>amélioration de l'~</B>îmbunătăţirea condiţiilor de locuit
 <B>habitation </B> <I>s.f. </I> <B>1 </B>. locuire; <B>l'~ de cette maison délabrée est impossible </B>locuirea în această casă dărăpănată este imposibilă. <B>2. </B>locuinţă; <B>~s à loyer modéré </B> (H. L. M.) locuinţe cu chirie modestă
 <B>habité </B> <I>adj. </I> locuit; populat; <B>zone ~e </B>zonă populată
@@ -68,7 +68,7 @@
 <B>*haidouk, heiduque </B> <I>s.m. </I> haiduc.
 <B>*haie </B> <I>s.f. </I> 1. gard (de mărăcini, de nuiele); <B>une ~ vive </B> un gard viu; <B>faire une brèche dans une ~</B> a face o gaură în gard; <B>franchir une ~</B> a sări un gard; <I>(sport) </I> <B>course de ~s </B>cursă de garduri. <B>2. </B> <I>(fig.) </I> şir, rând de oameni; <B>former/faire la ~</B> a se aşeza la rând, a se înşirui. <B>3. </B> <I>(în evul mediu) </I> linie de luptă formată din cavaleri. <B>4. </B>obstacol format din diverse lucruri; ~ <B>de rochers </B>obstacol format din stânci.
 <B>*haïk </B> <I>s.m. </I> burnuz.
-<B>*haïkaï, haïku </B> <I>s.m. </I> poem scurt japonez format din trei versuri. <br>
+<B>*haïkaï, haïku </B> <I>s.m. </I> poem scurt japonez format din trei versuri.
 <B>*haillon </B> <I>s.m. </I> zdreanţă, cârpă, buleandră, treanţă. 
 <B>*haillonneux, ~euse </B> <I>adj. </I> zdrenţăros, trenţăros. <B>'haine </B> <I>s.f. </I> ură, duşmănie, discordie, învrăjbire, vrăşmă- şie, vrajbă; <B>par ~ de </B>din ură faţă de; <B>avoir /éprouver / nourrir de la ~ pour qqn. </B>a nutri ură faţă de cineva; <B>prendre qqn. en ~</B> a prinde ură pe cineva, 
 <B>*haineusement </B> <I>adv. </I> cu ură, cu duşmănie. 
@@ -131,7 +131,7 @@
 <B>haloïde </B> <I>adj., s.m. (chim.) </I> compus al unui haiogen cu un metal. 
 <B>*hâloir </B> <I>s.m. </I> <B>1 </B>. uscătorie pentru anumite brânzeturi moi. 2. <I>(reg.) </I> uscătorie pentru cânepă
 <B>halomorphe </B> <I>adj. (despre un sol) </I> bogat în sare.
-<B>halophile </B> <I>adj. </I> referitor la un organism care trăieşte în soluri bogate în săruri. <br>
+<B>halophile </B> <I>adj. </I> referitor la un organism care trăieşte în soluri bogate în săruri.
 <B>halophyte </B> <I>s.f. (bot.) </I> halofită, plantă care trăieşte pe soluri bogate în săruri.
 <B>*halte </B>I. <I>s.f. </I> <B>1. </B>oprire, haltă, popas; poposire, şedere; <B>faire ~</B> a face popas, a face haltă; <B>dire ~</B> a da ordin de oprire; <I>(c. f.) </I> <B>~ de croisement </B>haltă de încrucişare. <B>II. </B> <I>interj. </I> Stai! Opreşte! Termină! Stop! încetează! Ajunge!
 <B>halte-garderie </B> <I>(pl. </I> <B>haltes-garderies) </B> <I>s.f. </I> grădiniţă de cartier.
@@ -190,7 +190,7 @@
 <B>*happe </B> <I>s.f. </I> <B>1 </B>. <I>(constr.) </I> scoabă. <B>2. </B>cleşte de turnător. 3. butuc metalic (la roţi).
 <B>*happement </B> <I>s.m. </I> <B>1. </B>hăpăire, hăpăit, acţiunea de a înghiţi cu lăcomie. <B>2. </B>înhăţare, înşfăcare. 3. lipire de o suprafaţă, aderenţă puternică.
 <B>*happer I. </B> <I>v.t. </I> <B>1 </B>. aînghiţi cu lăcomie şi cu zgomot, a hăpăi; <B>les oiseaux happent les insectes </B>păsărelele înghit cu lăcomie insectele. 2. a înhăţa, a înşfăca, a apuca, a prinde; <B>la machine a happé son bras </B>maşina i-a prins braţul. 3. <I>(arg. în expr.) </I> <B>~ le taillis </B>a o lua la fugă / la sănătoasa; a-şi lua picioarele / coada la spinare. <B>II. </B> <I>v.i. (înv. în expr.) </I> <B>~ à la langue </B>a se lipi de limbă
-<B>*haquebute, hacquebute </B> <I>s.f. (ist.) </I> archebuză primitivă folosită în sec. XV. <br>
+<B>*haquebute, hacquebute </B> <I>s.f. (ist.) </I> archebuză primitivă folosită în sec. XV.
 <B>*haquenée </B> <I>s.f. </I> <B>1. </B>cal sau iapă care merge în buiestru. 2. <I>(în trecut) </I> cal sau iapă pentru călărie.
 <B>*haquet </B> <I>s.m. </I> căruţă cu două roţi pentru transportul butoaielor.
 <B>*haquetier </B> <I>s.m. </I> căruţaş care transportă butoaie.
@@ -286,7 +286,7 @@
 <B>*hâtier </B> <I>s.m. (culinar) </I> suport pentru fixarea frigării
 <B>*hâtif, -ive </B> <I>adj. </I> <B>1 </B>. timpuriu, precoce, văratic, prematur; <B>printemps ~</B> primăvară timpurie; <B>2. </B>făcut în grabă, pripit, la repezeală; de mântuială; <I>(pop.) </I> <B>travail ~</B> muncă făcută în grabă, de mântuială; <B>jugement ~</B> judecată pripită.
 <B>*hâtiveau </B> <I>s.m. (înv.) </I> fruct sau legumă timpurie
-<B>*hâtivement </B> <I>adv. </I> <B>1. </B>în grabă, în pripă, pe fugă. <B>2. </B>de timpuriu, precoce. <br>
+<B>*hâtivement </B> <I>adv. </I> <B>1. </B>în grabă, în pripă, pe fugă. <B>2. </B>de timpuriu, precoce.
 <B>*hattéria </B> <I>s.m. (zool.) </I> <B> </B>reptilă din Oceania, singurul supravieţuitor din grupul rineocefalilor.
 <B>*hauban </B> <I>s.m. (mar. av.) </I> <B> </B>hoban.
 <B>*haubanage </B> <I>s.m. </I> <B> </B>totalitatea hobanelor unui vas sau ale unei aeronave.
@@ -355,7 +355,7 @@
 <B>hébraïsant, hébraïste </B> <I>s.m.f. </I> specialist în ebraică, ebraist.
 <B>hébraïser I. </B> <I>v.i. </I> <B>1. </B>a studia ebraica. <B>2. </B>a folosi cuvinte ebraice. <B>3. </B>a adopta obiceiuri evreieşti. <B>II. </B> <I>v.t. </I> a imprima caractere evreieşti în alte culturi
 <B>hébraïsme </B> <I>s.m. </I> expresie specifică limbii ebraice
-<B>hébraïste </B> <I>s.m.f., adj. </I> v. <B>hébraïsant. </B><br>
+<B>hébraïste </B> <I>s.m.f., adj. </I> v. <B>hébraïsant. </B>
 <B>hébreu I. </B> <I>s.m. </I> <B>1. </B> <I>(cu maj.) </I> numele vechilor evrei. 2. limba ebraică. <B>3. </B> <I>(în expr.) </I> <B>c'est de l'~</B>este de neînţeles. <B>II. </B> <I>adj.m. </I> ebraic; <B>l'alphabet ~</B> alfabetul ebraic.
 <B>hécatombe </B> <I>s.f. </I> <B>1. </B> <I>(antichit.) </I> hecatombă, sacrificiu religios de animale. 2. măcel, hecatombă, masacru; <B>la guerre provoque des ~s </B>războiul provoacă măceluri
 <B>hectare </B> <I>s.m. </I> hectar.
@@ -534,7 +534,7 @@
 <B>heptagonal, ~e </B> <I>(m.pl. </I> <B>-aux) </B> <I>adj. (geom.) </I> heptagonal
 <B>heptagone </B> <I>s.m. (geom.) </I> heptagon.
 <B>heptamètre </B> <I>adj., s.m. </I> (vers) alcătuit din şapte picioare.
-<B>heptane </B> <I>s.m. (chim.) </I> heptan. <br>
+<B>heptane </B> <I>s.m. (chim.) </I> heptan.
 <B>heptarchie </B> <I>s.f. </I> <B>1. </B>guvernare simultană de şapte persoane. 2. <I>(ist.) </I> nume dat celor şapte regate anglo-saxone (sec. VI-IX).
 <B>heptasyllabe </B> <I>adj., s.m. </I> vers cu şapte silabe
 <B>heptathlon </B> <I>s.m. (sport) </I> heptatlon.
@@ -627,7 +627,7 @@
 <B>herseur </B> <I>adj., s.m. </I> persoană care grăpează.
 <B>herseuse </B> <I>s.f. </I> grapă mecanică
 <B>hertz </B>s.m. <I>(fiz.) </I> hertz, unitate de măsură a frecvenţei
-<B>hertzien, ~ne </B> <I>adj. (fiz.) </I> hertzian; <B>ondes -nes </B>unde hertziene. <br>
+<B>hertzien, ~ne </B> <I>adj. (fiz.) </I> hertzian; <B>ondes -nes </B>unde hertziene.
 <B>hésitant, -e </B> <I>adj., s.m.f. </I> <B>1 </B>. şovăitor, ezitant, nehotărât, şovăielnic, fluctuant; <B>un caractère ~</B> un caracter şovăitor. 2. nesigur, împleticit, clătinat, împiedicat; <B>des pas ~s </B>paşi nesiguri, împleticiţi
 <B>hésitation </B> <I>s.f. </I> <B>1. </B>ezitare, şovăială, nehotărâre; <B>il se décida après bien des -s </B>el se hotărî după mai multe ezitări. <B>2. </B>îndoială, incertitudine; <B>cette réponse lève mes ~s </B>acest răspuns îmi înlătură îndoielile
 <B>hésiter </B> <I>v.i. </I> <B>1 </B>. a ezita, a şovăi, a fi nehotărât; <B>il a hésité avant de prendre cette décision </B>a ezitat înainte de a lua această hotărâre; <B>~ entre plusieurs solutions </B>a ezita între mai multe soluţii. <B>2. </B> <I>[cuprep. </I> <B>à) </B>a sta la gânduri, a nu îndrăzni, a nu se încumeta; <B>le témoin hésitait à dire toute la vérité </B>martorul nu îndrăznea să spună tot adevărul
@@ -722,7 +722,7 @@
 <B>hiement </B> <I>s.m. </I> <B>1 </B>. bătătorirea şi nivelarea terasamentelor cu maiul. 2. zgomotul produs de o macara în funcţiune. <B>1 </B>. 
 <B>hier I. </B> <I>adv. </I> <B>1 </B>. ieri; <B>~ matin </B>ieri dimineaţă. <B>2. </B>de curând, recent. 3. <I>(în expr.) </I> <B>n'être pas né d'~</B>a avea experienţă, a fi trecut prin ciur şi prin dârmon, a fi vulpe bătrână. <B>II. </B> <I>s.m. </I> ziua de ieri; <B>je l'ai cherché tout hier </B>l-am căutat toată ziua de ieri. <B>2. hier </B> <I>v.t. </I> a îndesa şi nivela; <B>- le chemin </B>a bătători şi nivela drumul (cu maiul).
 <B>*hiérarchie </B> <I>s.f. </I> ierarhie; <B>~ des valeurs morales </B> ierarhia valorilor morale.
-<B>*hiérarchique </B> <I>adj. </I> ierarhic; <B>passer par la voie ~</B> a o lua pe cale ierarhică. <br>
+<B>*hiérarchique </B> <I>adj. </I> ierarhic; <B>passer par la voie ~</B> a o lua pe cale ierarhică.
 <B>*hiérarchiquement </B> <I>adv. </I> (în mod) ierarhic; <B>il vous est ~</B> <B>supérieur </B>vă este ierarhic superior, 
 <B>*hiérarchisation </B> <I>s.f. </I> ierarhizare. 
 <B>*hiérarchiser </B> <I>v.t. </I> a ierarhiza, a organiza în ordine ierarhică. 
@@ -841,7 +841,7 @@
 <B>hoazin </B> <I>s.m. (ornit.) </I> pasăre din Amazonia asemănătoare cu fazanul <I>(Opisthocomus hoazin). </I>
 <B>*hobby </B> <I>s.m. (angl.) </I> hobby, marotă.
 <B>*hobereau </B> <I>s.m. </I> <B>1. </B> <I>(ornit.) </I> specie de şoim mic <I>(Falco subbuteo). </I> 2. nobil de ţară, boiernaş.
-<B>*hocco </B> <I>s.m. (ornit) </I> pasăre galinacee din America de Sud. <br> <B>'hoche </B> <I>s.f. </I> <B>1. </B> <I>(înv.) </I> crestătură pe răboj. <B>2. </B>crestătură; <B>le tranchant du couteau a des ~s </B>tăişul cuţitului are crestături. <B>'hochement </B> <I>s.m. (în expr.) ~ </I> <B> de tête </B>acţiunea de a clătina / da din cap. 
+<B>*hocco </B> <I>s.m. (ornit) </I> pasăre galinacee din America de Sud. <B>'hoche </B> <I>s.f. </I> <B>1. </B> <I>(înv.) </I> crestătură pe răboj. <B>2. </B>crestătură; <B>le tranchant du couteau a des ~s </B>tăişul cuţitului are crestături. <B>'hochement </B> <I>s.m. (în expr.) ~ </I> <B> de tête </B>acţiunea de a clătina / da din cap. 
 <B>*hochepot </B> <I>s.m. (culinar) </I> tocană (specialitate flamandă) din carne (de porc, vită, oaie) cu legume, 
 <B>*hoche-queue, hochequeue </B> <I>s.m. (ornit.) </I> codobatură <I>(Motacilla). </I> 
 <B>*hocher </B> <I>v.t. </I> <B>1. </B> <I>(înv.) </I> a scutura, a hâţâna. <B>2. </B> <I>(în expr.) ~ </I> <B>la tête </B>a clătina, a da din cap. 
@@ -1009,7 +1009,7 @@
 <B>*hors-jeu </B> <I>s.m. invar, (sport) </I> ofsaid.
 <B>*hors-la-loi </B> <I>s.m. invar, </I> om în afara legii, bandit, tâlhar, ticălos.
 <B>*hors-piste </B> <I>s.m. invar, </I> schi practicat în afara pistelor indicate. 
-<B>*hors-série </B> <I>adj. invar, </I> neobişnuit, ieşit din comun, aparte, nemaipomenit; <B>des vacances ~</B> vacanţă nemaipomenită. <br>
+<B>*hors-série </B> <I>adj. invar, </I> neobişnuit, ieşit din comun, aparte, nemaipomenit; <B>des vacances ~</B> vacanţă nemaipomenită.
 <B>*horst </B> <I>s.m. (geol.) </I> horst. 
 <B>*hors-texte </B> <I>s.m. invar, (poligr.) </I> planşă
 <B>hortensia </B> <I>s.m. (bot.) </I> hortensie <I>(Hydrangea hortensis). </I>
@@ -1115,7 +1115,7 @@
 <B>*huit </B>I. <I>num. card. </I> <B>1. </B>opt; ~ <B>lignes </B>opt rânduri. <B>2. </B> <I>(în expr.) ~ </I> <B>jours </B>o săptămână; <B>aujourd'hui en ~</B> de azi într-o săptămână; <B>donner ses ~ jours à qqn. </B>a pune pe cineva pe liber, a concedia pe cineva. II. <I>num. ord. </I> al optulea, a opta; <B>Charles ~</B> Carol al optulea. III. <I>s.m.invar. </I> 1. (cifra) opt; <B>le ~ suit le sept </B> opt urmează după şapte; <B>le ~ de pique </B>optul de pică. 2. ziua de opt a lunii; <B>le ~ novembre </B>opt noiembrie. 3. ambarcaţiune de canotaj cu opt vâslaşi.
 <B>*huitain </B> <I>s.m. (lit.) </I> 1. poezie de opt versuri. <B>2. </B>strofă de opt versuri.
 <B>*huitaine </B> <I>s.f. </I> <B>1. </B>ansam blu de opt; <B>une ~ de personnes </B>vreo opt persoane. <B>2. </B>opt zile; <I>(jur.) </I> <B>remettre une cause à ~</B> a amâna o cauză peste opt zile.
-<B>*huitante </B> <I>num. card. (Elveţia) </I> (numărul) optzeci. <br> <B>'huitième I. (le, la) </B> <I>num. ord. </I> al optulea, a opta; <B>le ~ étage d'un immeuble </B>al optulea etaj al unui imobil. <B>II. </B> <I>s.m. </I> <B>1. </B>optime; <B>~s de finale </B>optimi de finală. <B>2. </B> <I>(fam.) </I> etajul al optulea; <B>j'habite au ~</B> locuiesc la etajul al optulea, la etajul opt; <B>le ~ de la liste </B>al optulea de pe listă. <B>III. </B> <I>s.f. </I> clasa a opta, 
+<B>*huitante </B> <I>num. card. (Elveţia) </I> (numărul) optzeci. <B>'huitième I. (le, la) </B> <I>num. ord. </I> al optulea, a opta; <B>le ~ étage d'un immeuble </B>al optulea etaj al unui imobil. <B>II. </B> <I>s.m. </I> <B>1. </B>optime; <B>~s de finale </B>optimi de finală. <B>2. </B> <I>(fam.) </I> etajul al optulea; <B>j'habite au ~</B> locuiesc la etajul al optulea, la etajul opt; <B>le ~ de la liste </B>al optulea de pe listă. <B>III. </B> <I>s.f. </I> clasa a opta, 
 <B>*huitièmement </B> <I>adv. </I> în al optulea rând.
 <B>huître </B> <I>s.f. </I> <B>1 </B>. <I>(zool.) </I> stridie <I>(Ostrea edulis). </I> <B>2. </B> <I>(fig. fam.) </I> prostănac, bleg, neghiob, nerod, nătâng, netot, tont, tontălău.
 <B>huîtrier, ~ère I. </B> <I>adj. </I> referitor la stridii; <B>industrie -ère </B> industria stridiilor. <B>II. </B> <I>s.f. </I> <B>1. </B>banc de stridii. <B>2. </B> crescătorie de stridii. <B>III. </B> <I>s.m. (omit.) </I> pasăre care se hrăneşte cu crustacei şi moluşte <I>(Hoematopus ostralegus). </I> 
@@ -1221,7 +1221,7 @@
 <B>hydravion </B> <I>s.m. </I> hidroavion.
 <B>hydrazide </B> <I>s.f. (chim., farm.) </I> hidrazidă.
 <B>hydrazine </B> <I>s.f. (chim.) </I> hidrazină.
-<B>hydre </B> <I>s.f. </I> 1. <I>(mit.) </I> hidră. <B>2. </B> <I>(zool.) </I> hidră <I>(Hydra viridis). </I><br>
+<B>hydre </B> <I>s.f. </I> 1. <I>(mit.) </I> hidră. <B>2. </B> <I>(zool.) </I> hidră <I>(Hydra viridis). </I>
 <B>hydrémie </B> <I>s.f. (med.) </I> hidremie, creşterea cantităţii de plasmă sanguină
 <B>hydrique </B> <I>adj. (med. în expr.) </I> <B>régime ~</B> regim hidric, regim bazat pe consum mare de apă.
 <B>hydrobase </B> <I>s.f. (av.) </I> bază pentru hidroavioane.
@@ -1396,7 +1396,7 @@
 <B>hypocondre </B> <I>s.m. (anat.) </I> <B> </B>hipocondru.
 <B>hypocondriaque </B> <I>s.m.f. </I> <B> </B>ipohondru
 <B>hypocondrie </B> <I>s.f. </I> <B> </B>ipohondrie
-<B>hypocoristique </B> <I>adj. (lingv.) </I> <B> </B>hipocoristic. <br>
+<B>hypocoristique </B> <I>adj. (lingv.) </I> <B> </B>hipocoristic.
 <B>hypocras </B> <I>s.m. </I> vin aromatizat, foarte preţuit în evul mediu
 <B>hypocrisie </B> <I>s.f. </I> ipocrizie.
 <B>hypocrite </B> <I>adj., s.m.f. </I> ipocrit, prefăcut, perfid, mincinos, făţarnic, viclean
