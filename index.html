@@ -7,255 +7,30 @@
     <link rel="icon" type="image/png" href="favicon.png">
 
     <style>
-        #app {
-            display: none;
-        }
-
         html * {
             font-family: "Arial";
         }
 
         body {
-            display: flex;
-            align-items: stretch;
-            gap: 0px;
-
-            margin: 0;
-            height: 100vh;
-        }
-
-        #dictionary {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            align-items: stretch;
-        }
-
-        #searchArea {
-            padding: 8px;
-            background-color: #EEE;
-        }
-
-        #searchInput {
-            font-size: x-large;
-        }
-
-        #resultList {
-            overflow-y: auto;
-            list-style-type: none;
-            padding: 8px;
-            margin: 0;
-        }
-
-        li {
-            padding-top: 10px;
-            padding-bottom: 20px;
-            text-indent: -1em;
-            padding-left: 1em;
-        }
-
-        .term {
-            text-decoration: underline;
-            margin-right: 8px;
-        }
-
-        #resultCountLabel {
-            font-size: small;
-            opacity: 0.5;
-        }
-
-        /**/
-        #searchHistory {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-
-            min-width: 200px;
-            max-width: 200px;
-            padding: 8px;
-            background-color: #EEEEEE;
-        }
-
-        #searchHistoryList {
-            flex-grow: 1;
-        }
-
-        ::highlight(search-results) {
-            background-color: rgb(137, 216, 255);
+            padding: 1em;
         }
     </style>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script lang="text/javascript">
-        const definitions = new Map();
-        const searchTextHistory = new Array();
-
         $(document).ready(function () {
             if (window.location.href.endsWith("?dictionary")) {
                 $('html').show();
             } else {
                 $('html').empty();
             }
-
-            ['abc', 'def', 'g_i', 'h', 'jkl', 'mno', 'pqr', 'stu', 'vwxyz'].forEach(group => {
-                let file = group + '.html';
-                $.get(file, function (data) {
-                    let lines = data.split(/\n/);
-                    let terms = [];
-
-                    lines.forEach((line, index) => {
-                        if (line.startsWith("<B>")) {
-                            let term = entry.substring(3, entry.indexOf("</B>"));
-                            terms.push(term);
-                            var defs = definitions.get(term);
-                            if (defs === undefined) {
-                                defs = [];
-                                definitions.set(term, defs);
-                            }
-                            defs.push(line.replace("<B>", "<B class='term'>"));
-                        }
-                    });
-
-                    console.log(`Loaded ${lines.length} definitions from ${file}`, terms);
-                });
-            });
         });
-
-        function normalize(input) {
-            return input
-                .replaceAll('æ', 'ae')
-                .replaceAll('œ', 'oe')
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace("*", "")
-                .replace(",", "")
-                .replace("'", "")
-                .toLowerCase();
-        }
-
-        function search(shouldUpdateHistory) {
-            $('#searchInput').select();
-            $('#resultList').empty();
-
-            let searchText = $('#searchInput').val();
-            let searchInsideDefinitions = $('#searchInsideDefinitionsCheckBox').is(':checked');
-
-            if (searchText.length >= 2) {
-                if (shouldUpdateHistory) {
-                    addToHistory(searchText);
-                }
-
-                var resultCount = 0;
-                let normalizedSearchText = normalize(searchText);
-
-                definitions.forEach((defs, term, map) => {
-                    var found = false;
-                    if (searchInsideDefinitions) {
-                        for (var i = 0; i < defs.length; i++) {
-                            let def = defs[i];
-                            let normalizedDef = normalize(def);
-                            if (normalizedDef.includes(normalizedSearchText)) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    } else {
-                        let normalizedTerm = normalize(term);
-                        found = normalizedTerm.startsWith(normalizedSearchText);
-                    }
-
-                    if (found) {
-                        resultCount++;
-                        defs.forEach((def, index) => {
-                            $('#resultList').append(`<li>${def}</li>`);
-                        });
-                    }
-                });
-                $('#resultCountLabel').text(`${resultCount} results`);
-            } else {
-                $('#resultCountLabel').text('No results');
-            }
-
-            if (CSS && CSS.highlights) {
-                CSS.highlights.clear();
-                if (searchInsideDefinitions) {
-                    let treeWalker = document.createTreeWalker(resultList, NodeFilter.SHOW_TEXT);
-                    let textNodes = [];
-                    let currentNode = treeWalker.nextNode();
-                    while (currentNode) {
-                        textNodes.push(currentNode);
-                        currentNode = treeWalker.nextNode();
-                    }
-
-                    let ranges = [];
-                    textNodes.forEach((node) => {
-                        let text = node.textContent.toLowerCase();
-                        let startPos = 0;
-                        while (startPos < text.length) {
-                            const index = text.indexOf(query, startPos);
-                            if (index === -1) {
-                                break;
-                            }
-                            const range = new Range();
-                            range.setStart(node, index);
-                            range.setEnd(node, index + query.length);
-                            if (!range.collapsed) {
-                                ranges.push(range);
-                            }
-                            startPos = index + query.length;
-                        }
-                    });
-                    const searchResultsHighlight = new Highlight(...ranges);
-                    CSS.highlights.set("search-results", searchResultsHighlight);
-                }
-            }
-        }
-
-        function addToHistory(item) {
-            var itemIndex = searchTextHistory.indexOf(item);
-            if (itemIndex >= 0) {
-                console.log("Removing item from history", item, itemIndex, searchTextHistory);
-                searchTextHistory.splice(itemIndex, 1);
-                $("#searchHistoryList > option:nth-child(" + (itemIndex + 1) + ")").remove();
-            }
-
-            searchTextHistory.unshift(item);
-            $("#searchHistoryList").prepend("<option>" + item + "</option>");
-            $("#searchHistoryList").val([item]);
-        }
-
-        function clearHistory() {
-            searchTextHistory.splice(0, searchTextHistory.length);
-            $("#searchHistoryList").empty();
-        }
-
-        function loadSearchText() {
-            let selectedSearchText = $("#searchHistoryList").val()[0];
-            if (selectedSearchText) {
-                $("#searchInput").val(selectedSearchText);
-                search(false);
-            }
-        }
     </script>
 </head>
 
 <body>
-    <div id="dictionary">
-        <div id="searchArea">
-            <input id="searchInput" type="text" onchange="search(true)" />
-            <input id="searchInsideDefinitionsCheckBox" type="checkbox" name="searchInsideDefinitionsCheckBox"
-                onchange="search()" />
-            <label for="searchInsideDefinitionsCheckBox">Search inside definitions</label><br>
-            <label id="resultCountLabel">Type to search...</label>
-        </div>
-        <ul id="resultList"></ul>
-    </div>
-    <div id="searchHistory">
-        <button onclick="clearHistory()">Clear History</button>
-        <select id="searchHistoryList" multiple onchange="loadSearchText()">
-        </select>
-    </div>
+    <a href="fr/index.html">FR-RO moved here</a>
 </body>
 
 </html>
