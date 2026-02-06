@@ -1,0 +1,11 @@
+# macOS system files
+.DS_Store
+
+# Generated/compiled files
+main.*.js
+main.*.css
+*.js.map
+*.css.map
+
+
+# Keep source HTML files - they are not ignored
