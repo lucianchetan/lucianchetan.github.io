@@ -47,8 +47,7 @@
         #searchBox {
             display: flex;
             align-items: center;
-            width: 350px;
-            /*height: 2rem;*/
+            width: 400px;
             position: relative;
         }
 
@@ -138,6 +137,7 @@
 
         #historyList {
             flex-grow: 1;
+            overflow-y: auto;
         }
 
         [popover] {
@@ -290,8 +290,6 @@
             suggestionsList = document.getElementById("suggestionsList");
 
             searchInput.addEventListener("keyup", processInputChange);
-
-            // search(false);
         });
 
         ///
