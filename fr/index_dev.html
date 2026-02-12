@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <title>FR-RO</title>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/png" href="fr/favicon.png">
+
+    <style>
+        body {
+            font-family: "Arial", serif;
+            line-height: 1.5rem;
+
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+
+            margin: 0;
+            height: 100vh;
+
+            background-color: #FFF;
+        }
+
+        [popover] {
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        #search {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            align-items: stretch;
+        }
+
+        #searchHeader {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+
+            padding: 1rem;
+            background-color: #F4F4F4;
+            border-bottom: 1px solid #DDDDDD;
+        }
+
+        #searchBox {
+            display: flex;
+            align-items: center;
+            width: 350px;
+            /*height: 2rem;*/
+            position: relative;
+        }
+
+        #searchInput {
+            flex-grow: 1;
+            width: 100%;
+
+            padding: 0.5rem;
+            margin: 0;
+
+            font-size: x-large;
+            font-weight: bold;
+
+            anchor-name: --anchor_1;
+        }
+
+        #lookInsideButton {
+            position: absolute;
+            right: 0.5rem;
+        }
+
+        #stats {
+            display: flex;
+            flex-direction: row;
+            gap: 0.25rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #resultList {
+            overflow-y: auto;
+            list-style-type: none;
+            margin: 0;
+            padding: 0 0 1rem;
+        }
+
+        #resultList li {
+            padding: 1rem 1rem 1rem 2rem;
+            text-indent: -1rem;
+            border-bottom: 1px solid #F4F4F4;
+        }
+
+        #resultList li:hover {
+            background-color: #F8F8F8;
+        }
+
+        .term {
+            text-decoration: underline;
+            margin-right: 0.5rem;
+        }
+
+        .mute {
+            opacity: 0.35;
+        }
+
+        #resultCountLabel,
+        #highlightCountLabel {
+            height: auto;
+            line-height: normal;
+
+            padding: 0;
+            margin: 0;
+
+            font-size: small;
+            opacity: 0.35;
+        }
+
+        #history {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            min-width: 200px;
+            max-width: 200px;
+            padding: 0.5rem;
+            background-color: #FCFCFC;
+            border-left: 1px solid #DDDDDD;
+        }
+
+        #historyHeader {
+            display: flex;
+            flex-direction: row;
+            justify-content: start;
+            padding-inline-start: 0.5rem;
+            padding-block-start: 0.5rem;
+        }
+
+        #historyList {
+            flex-grow: 1;
+        }
+
+        [popover] {
+            border: 1px solid #DDD;
+            background-color: #FFF;
+            padding: 0.25rem;
+
+            position-anchor: --anchor_1;
+            top: anchor(--anchor_1 bottom);
+            left: anchor(--anchor_1 left);
+        }
+
+        .itemList {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .itemList li {
+            margin: 0;
+            padding: 0.25rem 2rem 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .itemList li:hover {
+            background-color: dodgerblue;
+            color: white;
+            cursor: pointer;
+        }
+
+        .iconButton {
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 0.25rem;
+            width: 2rem;
+            height: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .iconButton:hover {
+            background-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .iconButton:active {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .iconButton.selected {
+            background-color: dodgerblue;
+            color: white;
+        }
+
+        .iconButton:hover.selected {
+            background-color: #0085ff;
+            color: white;
+        }
+
+        ::highlight(search-results) {
+            background-color: rgba(255, 187, 0, 0.8);
+        }
+    </style>
+
+    <script lang="text/javascript" defer>
+        const fr_dict = {
+            "a": [
+                "<B>A, a</B> <I>s. m.</I><BR><BR> <B>1.</B> <I>(litera) </I>A, a;<B> depuis A jusqu'à Z</B> de la A la Z; de la alfa la omega; de la un cap la altul.<BR><BR> <B>2.</B> <I>(în expr.) f</I><B>ne savoir ni A ni B a.</B> a nu ști nimic;<B> b.</B> a nu ști carte;<B> prouver par A+B</B> a demonstra un lucru pe bază de dovezi.",
+                "<B>à</B> <I>prep. </I>(<B>à + le</B> <I>se contractă: </I><B>au; à + les</B> <I>se contractă: </I><B>aux</B>) <BR><BR> <B>1.</B> la; <I>(local) </I><B>vivre ~ la campagne</B> a trăi la țară; <B>un voyage ~ Madrid</B> o călătorie la Madrid; <I>(temporal) </I><B>~ midi</B> la amiază; <I>(sport)</I> <B>~ la mi - temps</B> la pauză; <B>~ la nuit close</B> la căderea nopții.<BR><BR> <B>2.</B> până la; <B>je suis chez moi de 5h. ~ 7h.</B> sunt acasă de la ora 5 până la ora 7. <BR><BR> <B>3.</B> cu; <B>il neigeait ~ gros flocons</B> ningea cu fulgi mari; <B>~ (mon) regret</B> cu regret; cu tot regretul; <B>mot ~ mot</B> cuvânt cu cuvânt; <B>avancer ~ grands pas</B> a înainta cu pași mari; <B>une porte ~ deux battants</B> o ușă cu două canaturi; <B>moteur ~ explosion</B> motor cu explozie; <B>~ condition de</B> cu condiția; <B>~ grand-peine</B> cu chiu cu vai; cu mare caznă; <B>~ haute voix</B> cu voce tare; <B>~ la longue</B> cu timpul; în cele din urmă. <BR><BR> <B>4.</B> de; <B>facile ~ dire</B> ușor de spus; <B>mesures ~ prendre</B> măsuri de luat; <B>blesser ~ mort</B> a răni de moarte; <B>une fourrure ~ trois millions</B> o blană de trei milioane; <B>~ vendre</B> de vânzare; <B>~ merveille</B> de minune. <BR><BR> <B>5.</B> pe; <B>~ pied</B> pe jos; <B>~ faux</B> pe nedrept; <B>~ l'intérieur</B> pe dinăuntru; <B>~ l'envers</B> pe dos, alandala; <B>acheter ~ crédit</B> a cumpăra pe credit / pe datorie; <I>(prov.) </I><B>ne remets jamais au lendemain ce que tu peux faire aujourd'hui</B> nu lăsa pe mâine ce poți face azi; <B>s'abonner ~ l'année</B> a se abona pe un an întreg. <BR><BR> <B>6.</B> după, conform, potrivit cu; <B>~ mon avis</B> după părerea mea; <B>s'habiller ~ la mode de Paris</B> a se îmbrăca după moda de la Paris; <B>~ ce qu'il dit</B> după câte spune. <BR><BR> <B>7.</B> ca; în calitate de; <B>prendre ~ témoin</B> a lua ca martor. <BR><BR> <B>8.</B> în; <B>~ ciel ouvert</B> în aer liber; <B>~ contre-poil</B> în răspăr; <B>~ contre-cœur</B> în silă; fără plăcere; <B>~ cet égard</B> în această privință; <B>~ cet effet</B> în acest scop; <B>~ défaut de a.</B> în lipsă de; <B>b.</B> în loc de; <B>~ bref délai</B> în curând; în scurt timp; <B>~ coup sûr</B> în mod sigur; cu siguranță; <B>~ la brune</B> în amurg; în faptul serii; <B>~ la fin</B> în cele din urmă; până la urmă; <B>~ la fois</B> în același timp; totodată; <B>~ l'aise</B> în voie; <B>~ l'aube</B> în zori; <B>~ la hâte</B> în grabă; în pripă; <B>~ votre santé</B> în sănătatea dv. <BR><BR> <B>9.</B> câte; <B>peu ~ peu, petit ~ petit</B> puțin câte puțin. <B>10.</B> din; <B>~ nouveau</B> din nou; <B>~ brûle-chandail</B> din senin; hodoronc-tronc; <B>~ cause de</B> din cauza. <BR><BR> <B>11.</B> (introduce un complement indirect; se traduce prin dativ) <B>offre ces fleurs ~ ta sœur</B> oferă aceste flori surorii tale. <BR><BR> <B>12.</B> (introduce un complement indirect; se traduce printr-un gen. sau adj. pos.) <B>cette cravate est ~ Roger</B> această cravată este a lui Roger; <B>c'est un parent ~ elle</B> este o rudă de-a ei. <BR><BR> <B>13.</B> <I>(în expr.)</I> <B>~ bon compte / marché</B> ieftin; <B>~ ce compte</B> dacă așa stau lucrurile; dacă e vorba pe așa; <B>~ cheval</B> călare; <B>~ compter de</B> începând cu; <B>agir au nez et ~ la barbe de qqn.</B> a acționa sub nasul cuiva; <B>~ la bonne heure</B> (să fie) într-un ceas bun; <B>~ la diable</B> rasolit; făcut de mântuială; cum dă Dumnezeu; <B>~ la lettre</B> aidoma; întocmai; literă cu literă; <B>~ la seule pensée de</B> numai la gândul că; <B>~ l'en croire</B> dacă ne-am lua după el; dac-ar fi să-i dăm crezare; <B>~ moins que</B> afară, numai dacă; <B>mettre qqn. ~ bout</B> a scoate din sărite pe cineva; <B>fils ~ papa</B> fecior de bani gata; <B>au secours!</B> ajutor! <B>la rédaction de ce projet nous prendra deux ~ trois jours</B> redactarea acestui proiect ne va lua două-trei zile; <B>il consent ~ témoigner</B> consimte să depună mărturie.",
+                "<B>abaca</B> <I>s.m. </I>fibră textilă extrasă din frunzele unui bananier.",
+                "<B>abacule</B> <I>s.m. </I>mic cub dintr-un mozaic.",
+                "<B>abaissable</B> <I>adj. </I><BR><BR> <B>1.</B> care poate fi coborât; care poate fi micșorat, scăzut.<BR><BR> <B>2.</B> <I>(fig.) </I>care poate fi umilit.",
+                "<B>abaissant, ~e</B> <I>adj. </I>înjositor, degradant, umilitor, jignitor, ofensator, dezonorant.",
+                "<B>abaisse</B> <I>s.f. (culinar) </I>foaie subțire de aluat."
+            ]
+        }
+
+        const definitions = new Map(); // { term : [definitions], etc. }
+        let terms = [];
+        const history = [];
+
+        let searchInput;
+        let lookInsideButton;
+        let resultCountLabel;
+        let highlightCountLabel;
+        let resultList;
+        let historyList;
+
+        let suggestionsPopover;
+        let suggestionsList;
+
+        let currentQuery = "";
+        let shouldLookInside = false;
+
+        // const issues = new Map();
+
+        [
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+        ]
+            .flatMap(letter => fr_dict[letter])
+            .forEach(entry => {
+                if (entry !== undefined && entry.startsWith("<B>")) {
+                    const term = entry.substring(3, entry.indexOf("</B>"));
+                    const mute = term.startsWith("*");
+
+                    const normalizedTerm = normalizeForSearch(term)
+                        .replace("*", "");
+                    let defs = definitions.get(normalizedTerm);
+                    if (defs === undefined) {
+                        defs = [];
+                        definitions.set(normalizedTerm, defs);
+                    }
+                    if (mute) {
+                        defs.push(entry.replace("<B>*", "<span class='mute'>*</span><B class='term'>"));
+                    } else {
+                        defs.push(entry.replace("<B>", "<B class='term'>"));
+                    }
+
+                    // const regex = /^[\*a-zàâãäçéèêëîïôöóûùüÿñæœ\s,\.~\-\(\)'\!/]+$/i;
+                    // if (!regex.test(term)) {
+                    //     console.error(term);
+                    // }
+
+                    // let i = term.indexOf("~");
+                    // if (i > 0) {
+                    //     let femininePlural = term.substring(i);
+                    //     var defs = issues.get(femininePlural);
+                    //     if (defs === undefined) {
+                    //         defs = [];
+                    //         issues.set(femininePlural, defs);
+                    //     }
+                    //     defs.push(term);
+                    // }
+                }
+            });
+        // console.log(issues);
+        terms = [...definitions.keys()].sort();
+        console.log(`Loaded ${definitions.size} definitions`);
+
+        document.addEventListener("DOMContentLoaded", function () {
+            searchInput = document.getElementById("searchInput");
+            lookInsideButton = document.getElementById("lookInsideButton");
+            resultCountLabel = document.getElementById("resultCountLabel");
+            highlightCountLabel = document.getElementById("highlightCountLabel");
+            resultList = document.getElementById("resultList");
+            historyList = document.getElementById("historyList");
+
+            suggestionsPopover = document.getElementById("suggestionsPopover");
+            suggestionsList = document.getElementById("suggestionsList");
+
+            searchInput.addEventListener("keyup", processInputChange);
+
+            // search(false);
+        });
+
+        ///
+
+        const IGNORED_KEYS = new Set(["Tab", "Shift", "Control", "Alt", "Meta", "CapsLock", "ArrowLeft", "ArrowRight"]);
+
+        function processInputChange(event) {
+            const key = event.key;
+            if (key === "Enter") {
+                search(true);
+            } else if (key === "ArrowUp") {
+                // previous suggestion
+            } else if (key === "ArrowDown") {
+                // next suggestion
+            } else if (key === "Escape") {
+                hideSuggestionsPopover();
+            } else if (!IGNORED_KEYS.has(key)) {
+                suggest();
+            }
+        }
+
+        function normalizeForSearch(input) {
+            return input
+                .toLowerCase()
+                .replaceAll('æ', 'ae')
+                .replaceAll('œ', 'oe')
+                .replaceAll('ç', 'c')
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replaceAll(",", "")
+                .replaceAll("'", "");
+        }
+
+        function normalizeForHighlighting(input) {
+            return input
+                .toLowerCase()
+                .replaceAll('ae', 'æ')
+                .replaceAll('oe', 'œ')
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function toggleLookInside() {
+            shouldLookInside = !shouldLookInside;
+            if (shouldLookInside) {
+                lookInsideButton.classList.add("selected");
+            } else {
+                lookInsideButton.classList.remove("selected");
+            }
+            search(false);
+        }
+
+        function search(shouldUpdateHistory) {
+            searchInput.select();
+
+            hideSuggestionsPopover();
+            cleanupResults();
+            cleanupHighlights();
+
+            ///
+
+            let resultCount = 0;
+            const query = searchInput.value.trim();
+
+            if (query.length >= 1) {
+                if (shouldUpdateHistory) {
+                    addToHistory(query);
+                }
+
+                resultCount = generateResults(
+                    normalizeForSearch(query),
+                    shouldLookInside);
+
+                const highlightCount = generateHighlights(query);
+                highlightCountLabel.textContent = highlightCount > 0 ? `/ ${highlightCount} highlight${highlightCount !== 1 ? 's' : ''}` : '';
+            }
+            resultCountLabel.textContent = `${resultCount} result${resultCount !== 1 ? 's' : ''}`;
+        }
+
+        function showSuggestionsPopover() {
+            if (!suggestionsPopover) return;
+            if (!suggestionsPopover.matches(":popover-open")) {
+                suggestionsPopover.showPopover();
+            }
+        }
+
+        function hideSuggestionsPopover() {
+            if (!suggestionsPopover) return;
+            if (suggestionsPopover.matches(":popover-open")) {
+                suggestionsPopover.hidePopover();
+            }
+            currentQuery = "";
+        }
+
+        function suggest() {
+            const query = searchInput.value.trim();
+            if (query.length === 0) {
+                hideSuggestionsPopover();
+            } else if (query !== currentQuery && query.length >= 1) {
+                currentQuery = normalizeForSearch(query);
+                const suggestions = [];
+                for (let i = 0; i < terms.length; i++) {
+                    if (terms[i].startsWith(query)) {
+                        suggestions.push(terms[i]);
+                        if (suggestions.length >= 10) {
+                            break;
+                        }
+                    }
+                }
+
+                suggestionsList.textContent = "";
+                suggestions.forEach((suggestion) => {
+                    const li = document.createElement("li");
+                    li.textContent = suggestion;
+                    li.addEventListener("click", () => {
+                        searchInput.value = suggestion;
+                        search(true);
+                    })
+                    suggestionsList.appendChild(li);
+                });
+
+                if (suggestions.length > 0) {
+                    showSuggestionsPopover();
+                } else {
+                    hideSuggestionsPopover();
+                }
+            }
+        }
+
+        function cleanupResults() {
+            resultList.scrollTo(0, 0);
+            resultList.textContent = "";
+            resultCountLabel.textContent = '0 results';
+        }
+
+        function generateResults(query, shouldLookInside) {
+            let count = 0;
+            let isOneLetterQuery = query.length === 1;
+            definitions.forEach((defs, term) => {
+                let found = false;
+                if (isOneLetterQuery) {
+                    found = term === query;
+
+                } else if (shouldLookInside) {
+                    for (let i = 0; i < defs.length; i++) {
+                        let def = defs[i];
+                        let normalizedDef = normalizeForSearch(def);
+                        if (normalizedDef.includes(query)) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                } else {
+                    found = term.startsWith(query);
+                }
+
+                if (found) {
+                    count++;
+                    defs.forEach((def) => {
+                        const li = document.createElement("li");
+                        li.innerHTML = def;
+                        resultList.appendChild(li);
+                    });
+                }
+            });
+            return count;
+        }
+
+        function cleanupHighlights() {
+            if (CSS && CSS.highlights) {
+                CSS.highlights.clear();
+                highlightCountLabel.textContent = '';
+            }
+        }
+
+        function generateHighlights(query) {
+            const ranges = [];
+            if (CSS && CSS.highlights && query.length >= 2) {
+                const treeWalker = document.createTreeWalker(resultList, NodeFilter.SHOW_TEXT);
+                const textNodes = [];
+                let currentNode = treeWalker.nextNode();
+                while (currentNode) {
+                    textNodes.push(currentNode);
+                    currentNode = treeWalker.nextNode();
+                }
+
+                const normalizedQuery = normalizeForHighlighting(query);
+
+                textNodes.forEach((node) => {
+                    const text = normalizeForHighlighting(node.textContent);
+                    let startPos = 0;
+                    while (startPos < text.length) {
+                        const index = text.indexOf(normalizedQuery, startPos);
+                        if (index === -1) {
+                            break;
+                        }
+                        const range = new Range();
+                        range.setStart(node, index);
+                        range.setEnd(node, index + normalizedQuery.length);
+                        if (!range.collapsed) {
+                            ranges.push(range);
+                        }
+                        startPos = index + normalizedQuery.length;
+                    }
+                });
+                const searchResultsHighlight = new Highlight(...ranges);
+                CSS.highlights.set("search-results", searchResultsHighlight);
+            }
+            return ranges.length;
+        }
+
+        function addToHistory(item) {
+            const itemIndex = history.indexOf(item);
+            if (itemIndex >= 0) {
+                history.splice(itemIndex, 1);
+                const itemToRemove = document.querySelector(`#historyList > li:nth-child(${itemIndex + 1})`);
+                historyList.removeChild(itemToRemove);
+            }
+
+            history.unshift(item);
+
+            const el = document.createElement("li");
+            el.value = item;
+            el.textContent = item;
+            el.onclick = () => loadSearchText(item);
+            historyList.prepend(el);
+            historyList.value = [item];
+        }
+
+        function clearHistory() {
+            history.splice(0, history.length);
+            historyList.textContent = "";
+        }
+
+        function loadSearchText(query) {
+            searchInput.value = query;
+            search(false);
+        }
+    </script>
+</head>
+
+<body>
+<div id="search">
+    <div id="searchHeader">
+        <div id="searchBox">
+            <input id="searchInput" type="text" autocomplete='off' spellcheck='false' autocorrect='off'
+                   placeholder="Search"/>
+            <button id="lookInsideButton" class="iconButton" onclick="toggleLookInside()" title="Look inside">
+                <svg viewBox="0 0 22.7109 18.3047" width="24" fill="currentColor">
+                    <g>
+                        <rect height="18.3047" opacity="0" width="22.7109" x="0" y="0"/>
+                        <path d="M3.19531 12.993L3.19531 13.8594C3.19531 14.6719 3.63281 15.0859 4.41406 15.0859L10.821 15.0859L12.0748 16.3437L4.39062 16.3438C2.76562 16.3438 1.9375 15.5391 1.9375 13.9297L1.9375 12.0604C2.31178 12.4248 2.73478 12.7385 3.19531 12.993ZM20.3672 4.38281L20.3672 13.9297C20.3672 15.5391 19.5469 16.3438 17.9141 16.3438L16.8426 16.3437C16.8437 16.3361 16.8438 16.3282 16.8438 16.3203C16.8438 15.863 16.6875 15.4231 16.419 15.0859L17.8906 15.0859C18.6641 15.0859 19.1094 14.6719 19.1094 13.8594L19.1094 4.45312C19.1094 3.64062 18.6641 3.21875 17.8906 3.21875L10.7073 3.21875C10.2116 2.70194 9.62533 2.27346 8.97224 1.96094L17.9141 1.96094C19.5469 1.96094 20.3672 2.77344 20.3672 4.38281Z"/>
+                        <path d="M6.23438 13.7891C9.67188 13.7891 12.4688 10.9922 12.4688 7.55469C12.4688 4.10938 9.67188 1.32031 6.23438 1.32031C2.79688 1.32031 0 4.10938 0 7.55469C0 10.9922 2.79688 13.7891 6.23438 13.7891ZM6.23438 12.4531C3.53125 12.4531 1.33594 10.2578 1.33594 7.55469C1.33594 4.84375 3.53125 2.65625 6.23438 2.65625C8.9375 2.65625 11.1328 4.84375 11.1328 7.55469C11.1328 10.2578 8.9375 12.4531 6.23438 12.4531ZM10.6875 10.8281L9.35938 12.1094L14.2188 16.9766C14.4062 17.1641 14.6328 17.2422 14.875 17.2422C15.4062 17.2422 15.7812 16.8438 15.7812 16.3203C15.7812 16.0703 15.6797 15.8438 15.5234 15.6797Z"/>
+                        <path d="M3.71094 7.05469L8.75 7.05469C9.0625 7.05469 9.29688 6.8125 9.29688 6.50781C9.29688 6.20312 9.0625 5.96094 8.75 5.96094L3.71094 5.96094C3.39844 5.96094 3.17188 6.20312 3.17188 6.50781C3.17188 6.8125 3.39844 7.05469 3.71094 7.05469ZM3.71094 9.14062L7.39844 9.14062C7.70312 9.14062 7.95312 8.90625 7.95312 8.60156C7.95312 8.28906 7.70312 8.04688 7.39844 8.04688L3.71094 8.04688C3.39844 8.04688 3.17188 8.28906 3.17188 8.60156C3.17188 8.90625 3.39844 9.14062 3.71094 9.14062Z"/>
+                    </g>
+                </svg>
+            </button>
+        </div>
+
+        <div id="stats">
+            <p id="resultCountLabel"></p>
+            <p id="highlightCountLabel"></p>
+        </div>
+
+        <div id="suggestionsPopover" popover="auto">
+            <ul id="suggestionsList" class="itemList"></ul>
+        </div>
+    </div>
+
+    <ul id="resultList"></ul>
+</div>
+<div id="history">
+    <div id="historyHeader">
+        <button id="clearHistoryButton" class="iconButton" onclick="clearHistory()" title="Clear history">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.5703 18.2422" width="24" fill="currentColor">
+                <g>
+                    <rect height="18.2422" opacity="0" width="23.5703" x="0" y="0"/>
+                    <path d="M19.5072 8.26182C19.1915 8.19716 18.865 8.16406 18.5312 8.16406C18.4039 8.16406 18.2775 8.16891 18.1536 8.18343C17.7073 4.95358 14.94 2.47656 11.5859 2.47656C7.91406 2.47656 4.94531 5.44531 4.94531 9.11719C4.94531 12.7891 7.91406 15.7578 11.5859 15.7578C12.4276 15.7578 13.2324 15.6018 13.9698 15.3107C14.1573 15.7273 14.404 16.1113 14.698 16.4539C13.7419 16.861 12.69 17.0859 11.5859 17.0859C7.1875 17.0859 3.61719 13.5156 3.61719 9.11719C3.61719 4.71875 7.1875 1.14844 11.5859 1.14844C15.6952 1.14844 19.0817 4.26474 19.5072 8.26182Z"/>
+                    <path d="M12.125 4.14844L12.125 9.41406C12.125 9.72656 11.8828 9.96094 11.5781 9.96094L7.5 9.96094C7.1875 9.96094 6.95312 9.72656 6.95312 9.41406C6.95312 9.10938 7.1875 8.875 7.5 8.875L11.0391 8.875L11.0391 4.14844C11.0391 3.84375 11.2734 3.60938 11.5781 3.60938C11.8828 3.60938 12.125 3.84375 12.125 4.14844Z"/>
+                    <path d="M22.5 13.2031C22.5 15.375 20.6875 17.1719 18.5312 17.1719C16.3594 17.1719 14.5625 15.3906 14.5625 13.2031C14.5625 11.0312 16.3594 9.23438 18.5312 9.23438C20.7109 9.23438 22.5 11.0234 22.5 13.2031ZM19.6562 11.3516L18.5156 12.5L17.4531 11.4453C17.2656 11.2656 16.9688 11.2734 16.7812 11.4453C16.5938 11.625 16.6016 11.9297 16.7812 12.1172L17.8359 13.1797L16.6875 14.3281C16.4844 14.5312 16.5156 14.8359 16.7109 15.0234C16.9062 15.2188 17.2109 15.25 17.4141 15.0469L18.5625 13.9062L19.6172 14.9531C19.8125 15.1406 20.1016 15.1328 20.2891 14.9531C20.4766 14.7734 20.4688 14.4766 20.2891 14.2812L19.2344 13.2266L20.3828 12.0781C20.5859 11.875 20.5547 11.5703 20.3594 11.375C20.1641 11.1875 19.8594 11.1484 19.6562 11.3516Z"/>
+                </g>
+            </svg>
+        </button>
+
+    </div>
+    <ul id="historyList" class="itemList"></ul>
+</div>
+</body>
+
+</html>
