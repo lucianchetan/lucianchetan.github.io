@@ -69,14 +69,6 @@
             right: 0.5rem;
         }
 
-        #stats {
-            display: flex;
-            flex-direction: row;
-            gap: 0.25rem;
-            justify-content: center;
-            align-items: center;
-        }
-
         #resultList {
             overflow-y: auto;
             list-style-type: none;
@@ -100,18 +92,6 @@
         }
 
         .mute {
-            opacity: 0.35;
-        }
-
-        #resultCountLabel,
-        #highlightCountLabel {
-            height: auto;
-            line-height: normal;
-
-            padding: 0;
-            margin: 0;
-
-            font-size: small;
             opacity: 0.35;
         }
 
@@ -221,8 +201,6 @@
 
         let searchInput;
         let lookInsideButton;
-        let resultCountLabel;
-        let highlightCountLabel;
         let resultList;
         let historyList;
 
@@ -281,8 +259,6 @@
         document.addEventListener("DOMContentLoaded", function () {
             searchInput = document.getElementById("searchInput");
             lookInsideButton = document.getElementById("lookInsideButton");
-            resultCountLabel = document.getElementById("resultCountLabel");
-            highlightCountLabel = document.getElementById("highlightCountLabel");
             resultList = document.getElementById("resultList");
             historyList = document.getElementById("historyList");
 
@@ -351,22 +327,19 @@
 
             ///
 
-            let resultCount = 0;
             const query = searchInput.value.trim();
-
             if (query.length >= 1) {
                 if (shouldUpdateHistory) {
                     addToHistory(query);
                 }
 
-                resultCount = generateResults(
+                const resultCount = generateResults(
                     normalizeForSearch(query),
                     shouldLookInside);
+                console.log("Found " + resultCount + " results for query '" + query + "'");
 
-                const highlightCount = generateHighlights(query);
-                highlightCountLabel.textContent = highlightCount > 0 ? `/ ${highlightCount} highlight${highlightCount !== 1 ? 's' : ''}` : '';
+                generateHighlights(query);
             }
-            resultCountLabel.textContent = `${resultCount} result${resultCount !== 1 ? 's' : ''}`;
         }
 
         function showSuggestionsPopover() {
@@ -422,7 +395,6 @@
         function cleanupResults() {
             resultList.scrollTo(0, 0);
             resultList.textContent = "";
-            resultCountLabel.textContent = '0 results';
         }
 
         function generateResults(query, shouldLookInside) {
@@ -462,7 +434,6 @@
         function cleanupHighlights() {
             if (CSS && CSS.highlights) {
                 CSS.highlights.clear();
-                highlightCountLabel.textContent = '';
             }
         }
 
@@ -549,12 +520,6 @@
                 </svg>
             </button>
         </div>
-
-        <div id="stats">
-            <p id="resultCountLabel"></p>
-            <p id="highlightCountLabel"></p>
-        </div>
-
         <div id="suggestionsPopover" popover="auto">
             <ul id="suggestionsList" class="itemList"></ul>
         </div>
