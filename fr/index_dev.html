@@ -7,6 +7,23 @@
     <link rel="icon" type="image/png" href="fr/favicon.png">
 
     <style>
+        :root {
+            --color-background-primary: #FFF;
+            --color-background-search: #F4F4F4;
+            --color-background-history: #F8F8F8;
+            --color-background-result-hover: #F8F8F8;
+            --color-background-selection: dodgerblue;
+            --color-background-highlight: rgba(255, 187, 0, 0.75);
+            --color-text-selection: white;
+            --color-separator: #DDDDDD;
+
+            --color-button-background: rgba(0, 0, 0, 0.05);
+            --color-button-background-hover: rgba(0, 0, 0, 0.15);
+            --color-button-background-active: rgba(0, 0, 0, 0.3);
+            --color-button-background-selected: dodgerblue;
+            --color-button-background-selected-hover: #0085ff;
+        }
+
         body {
             font-family: "Arial", serif;
             line-height: 1.5rem;
@@ -18,7 +35,7 @@
             margin: 0;
             height: 100vh;
 
-            background-color: #FFF;
+            background-color: var(--color-background-primary);
         }
 
         [popover] {
@@ -40,8 +57,8 @@
             gap: 1rem;
 
             padding: 1rem;
-            background-color: #F4F4F4;
-            border-bottom: 1px solid #DDDDDD;
+            background-color: var(--color-background-search);
+            border-bottom: 1px solid var(--color-separator);
         }
 
         #searchBox {
@@ -61,7 +78,7 @@
             font-size: x-large;
             font-weight: bold;
 
-            anchor-name: --anchor_1;
+            anchor-name: --anchor_suggestions;
         }
 
         #lookInsideButton {
@@ -77,13 +94,13 @@
         }
 
         #resultList li {
-            padding: 1rem 1rem 1rem 2rem;
-            text-indent: -1rem;
-            border-bottom: 1px solid #F4F4F4;
+            padding: 1rem 1rem 1rem 3rem;
+            text-indent: -2rem;
+            border-bottom: 1px dotted var(--color-separator);
         }
 
         #resultList li:hover {
-            background-color: #F8F8F8;
+            background-color: var(--color-background-result-hover);
         }
 
         .term {
@@ -100,11 +117,11 @@
             flex-direction: column;
             gap: 0.5rem;
 
-            min-width: 200px;
-            max-width: 200px;
+            min-width: 250px;
+            max-width: 250px;
             padding: 0.5rem;
-            background-color: #FCFCFC;
-            border-left: 1px solid #DDDDDD;
+            background-color: var(--color-background-history);
+            border-left: 1px solid var(--color-separator);
         }
 
         #historyHeader {
@@ -121,13 +138,13 @@
         }
 
         [popover] {
-            border: 1px solid #DDD;
-            background-color: #FFF;
+            border: 1px solid var(--color-separator);
+            background-color: var(--color-background-primary);
             padding: 0.25rem;
 
-            position-anchor: --anchor_1;
-            top: anchor(--anchor_1 bottom);
-            left: anchor(--anchor_1 left);
+            position-anchor: --anchor_suggestions;
+            top: anchor(--anchor_suggestions bottom);
+            left: anchor(--anchor_suggestions left);
         }
 
         .itemList {
@@ -143,14 +160,14 @@
         }
 
         .itemList li:hover {
-            background-color: dodgerblue;
-            color: white;
+            background-color: var(--color-background-selection);
+            color: var(--color-text-selection);
             cursor: pointer;
         }
 
         .iconButton {
             cursor: pointer;
-            background-color: rgba(0, 0, 0, 0.05);
+            background-color: var(--color-button-background);
             border: none;
             border-radius: 0.25rem;
             width: 2rem;
@@ -160,25 +177,25 @@
         }
 
         .iconButton:hover {
-            background-color: rgba(0, 0, 0, 0.15);
+            background-color: var(--color-button-background-hover);
         }
 
         .iconButton:active {
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: var(--color-button-background-active);
         }
 
         .iconButton.selected {
-            background-color: dodgerblue;
-            color: white;
+            background-color: var(--color-background-selection);
+            color: var(--color-text-selection);
         }
 
         .iconButton:hover.selected {
-            background-color: #0085ff;
-            color: white;
+            background-color: var(--color-button-background-selected-hover);
+            color: var(--color-text-selection);
         }
 
         ::highlight(search-results) {
-            background-color: rgba(255, 187, 0, 0.8);
+            background-color: var(--color-background-highlight);
         }
     </style>
 
