@@ -283,6 +283,12 @@
             suggestionsList = document.getElementById("suggestionsList");
 
             searchInput.addEventListener("keyup", processInputChange);
+
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    searchInput.focus();
+                }
+            });
         });
 
         ///
