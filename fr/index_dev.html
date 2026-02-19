@@ -13,6 +13,7 @@
             --color-background-history: #F8F8F8;
             --color-background-result-hover: #F8F8F8;
             --color-background-selection: dodgerblue;
+            --color-background-hover: rgba(30, 144, 255, 0.35);
             --color-background-highlight: rgba(255, 187, 0, 0.75);
             --color-text-selection: white;
             --color-separator: #DDDDDD;
@@ -160,9 +161,13 @@
         }
 
         .itemList li:hover {
+            background-color: var(--color-background-hover);
+            cursor: pointer;
+        }
+
+        .itemList li.selected {
             background-color: var(--color-background-selection);
             color: var(--color-text-selection);
-            cursor: pointer;
         }
 
         .iconButton {
@@ -225,6 +230,7 @@
         let suggestionsList;
 
         let currentQuery = "";
+        let selectedSuggestionIndex = -1;
         let shouldLookInside = false;
 
         // const issues = new Map();
@@ -287,7 +293,7 @@
             searchInput.addEventListener("mouseenter", () => {
                 searchInput.focus();
                 searchInput.select();
-            })
+            });
 
             document.addEventListener("visibilitychange", () => {
                 if (!document.hidden) {
@@ -304,11 +310,25 @@
         function processInputChange(event) {
             const key = event.key;
             if (key === "Enter") {
+                if (selectedSuggestionIndex >= 0 && suggestionsList && suggestionsList.children.length > 0) {
+                    const li = suggestionsList.children[selectedSuggestionIndex];
+                    if (li) {
+                        searchInput.value = li.textContent;
+                    }
+                }
                 search(true);
             } else if (key === "ArrowUp") {
-                // previous suggestion
+                selectedSuggestionIndex--;
+                if (selectedSuggestionIndex < 0) {
+                    selectedSuggestionIndex = 0;
+                }
+                updateSuggestionSelection();
             } else if (key === "ArrowDown") {
-                // next suggestion
+                selectedSuggestionIndex++;
+                if (selectedSuggestionIndex >= suggestionsList.children.length) {
+                    selectedSuggestionIndex = suggestionsList.children.length - 1;
+                }
+                updateSuggestionSelection();
             } else if (key === "Escape") {
                 hideSuggestionsPopover();
             } else if (!IGNORED_KEYS.has(key)) {
@@ -384,6 +404,7 @@
                 suggestionsPopover.hidePopover();
             }
             currentQuery = "";
+            selectedSuggestionIndex = -1;
         }
 
         function suggest() {
@@ -414,6 +435,8 @@
                 });
 
                 if (suggestions.length > 0) {
+                    selectedSuggestionIndex = -1;
+                    updateSuggestionSelection();
                     showSuggestionsPopover();
                 } else {
                     hideSuggestionsPopover();
@@ -464,6 +487,22 @@
             if (CSS && CSS.highlights) {
                 CSS.highlights.clear();
             }
+        }
+
+        function updateSuggestionSelection() {
+            if (!suggestionsList) {
+                return;
+            }
+            const children = suggestionsList.children;
+            for (let i = 0; i < children.length; i++) {
+                children[i].classList.toggle('selected', i === selectedSuggestionIndex);
+            }
+            // NOTE: the list is not very tall;
+            // ensure the selected item is visible
+            // const li = children[selectedSuggestionIndex];
+            // if (li && typeof li.scrollIntoView === 'function') {
+            //     li.scrollIntoView({block: 'nearest'});
+            // }
         }
 
         function generateHighlights(query) {
