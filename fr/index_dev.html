@@ -284,6 +284,11 @@
 
             searchInput.addEventListener("keyup", processInputChange);
 
+            searchInput.addEventListener("mouseenter", () => {
+                searchInput.focus();
+                searchInput.select();
+            })
+
             document.addEventListener("visibilitychange", () => {
                 if (!document.hidden) {
                     searchInput.focus();
