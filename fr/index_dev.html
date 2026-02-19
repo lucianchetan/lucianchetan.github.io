@@ -46,6 +46,8 @@
         }
 
         #search {
+            position: relative;
+
             display: flex;
             flex-direction: column;
             flex-grow: 1;
@@ -201,6 +203,28 @@
 
         ::highlight(search-results) {
             background-color: var(--color-background-highlight);
+        }
+
+        #info {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.5rem;
+
+            padding: 0.25rem;
+            margin: 0;
+
+            font-size: x-small;
+            text-box-trim: trim-both;
+
+            border-radius: 0.25rem;
+            background: white;
+            color: lightgray;
+            border: 1px solid transparent;
+        }
+
+        #info:hover {
+            color: gray;
+            border: 1px solid lightgray;
         }
     </style>
 
@@ -594,6 +618,8 @@
     </div>
 
     <ul id="resultList"></ul>
+
+    <p id="info" title="Version">2026-02-19</p>
 </div>
 <div id="history">
     <div id="historyHeader">
@@ -607,7 +633,6 @@
                 </g>
             </svg>
         </button>
-
     </div>
     <ul id="historyList" class="itemList"></ul>
 </div>
