@@ -15,14 +15,40 @@
             --color-background-selection: dodgerblue;
             --color-background-hover: rgba(30, 144, 255, 0.35);
             --color-background-highlight: rgba(255, 187, 0, 0.75);
+            --color-text-primary: #111;
             --color-text-selection: white;
-            --color-separator: #DDDDDD;
+            --color-separator: #DDD;
 
             --color-button-background: rgba(0, 0, 0, 0.05);
             --color-button-background-hover: rgba(0, 0, 0, 0.15);
             --color-button-background-active: rgba(0, 0, 0, 0.3);
             --color-button-background-selected: dodgerblue;
             --color-button-background-selected-hover: #0085ff;
+
+            --color-input-background: white;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background-primary: #1E1E1E;
+                --color-background-search: #2D2D2D;
+                --color-background-history: #252525;
+                --color-background-result-hover: #2D2D2D;
+                --color-background-selection: #0078D4;
+                --color-background-hover: rgba(0, 120, 212, 0.35);
+                --color-background-highlight: rgb(122, 90, 0);
+                --color-text-primary: #DDD;
+                --color-text-selection: white;
+                --color-separator: #3D3D3D;
+
+                --color-button-background: rgba(255, 255, 255, 0.08);
+                --color-button-background-hover: rgba(255, 255, 255, 0.15);
+                --color-button-background-active: rgba(255, 255, 255, 0.25);
+                --color-button-background-selected: dodgerblue;
+                --color-button-background-selected-hover: #1084D8;
+
+                --color-input-background: #222;
+            }
         }
 
         body {
@@ -36,6 +62,7 @@
             margin: 0;
             height: 100vh;
 
+            color: var(--color-text-primary);
             background-color: var(--color-background-primary);
         }
 
@@ -70,6 +97,11 @@
         }
 
         #searchInput {
+            color: var(--color-text-primary);
+            background-color: var(--color-input-background);
+            border: 1px solid var(--color-separator);
+            border-radius: 0.5rem;
+
             flex-grow: 1;
             width: 100%;
 
@@ -140,7 +172,7 @@
         }
 
         [popover] {
-            border: 1px solid var(--color-separator);
+            border: 1px solid var(--color-background-selection);
             background-color: var(--color-background-primary);
             padding: 0.25rem;
 
@@ -159,6 +191,7 @@
             margin: 0;
             padding: 0.25rem 2rem 0.25rem 0.5rem;
             border-radius: 0.25rem;
+            color: var(--color-text-primary);
         }
 
         .itemList li:hover {
@@ -173,6 +206,7 @@
 
         .iconButton {
             cursor: pointer;
+            color: var(--color-text-primary);
             background-color: var(--color-button-background);
             border: none;
             border-radius: 0.25rem;
@@ -204,6 +238,11 @@
             background-color: var(--color-background-highlight);
         }
 
+        ::selection {
+            color: var(--color-text-selection);
+            background-color: var(--color-background-selection);
+        }
+
         #info {
             padding: 0.25rem;
             margin: 0;
@@ -213,7 +252,6 @@
             user-select: none;
 
             border-radius: 0.25rem;
-            color: lightgray;
         }
 
         #info:hover {
@@ -331,7 +369,7 @@
                 if (selectedSuggestionIndex >= 0 && suggestionsList && suggestionsList.children.length > 0) {
                     const li = suggestionsList.children[selectedSuggestionIndex];
                     if (li) {
-                        searchInput.value = li.textContent;
+                        searchInput.value = li.title;
                     }
                 }
                 search(true);
@@ -432,9 +470,11 @@
             } else if (query !== currentQuery && query.length >= 1) {
                 currentQuery = normalizeForSearch(query);
                 const suggestions = [];
+                const suggestionDefinitions = [];
                 for (let i = 0; i < terms.length; i++) {
                     if (terms[i].startsWith(query)) {
                         suggestions.push(terms[i]);
+                        suggestionDefinitions.push(definitions.get(terms[i]));
                         if (suggestions.length >= 10) {
                             break;
                         }
@@ -444,7 +484,9 @@
                 suggestionsList.textContent = "";
                 suggestions.forEach((suggestion) => {
                     const li = document.createElement("li");
-                    li.textContent = suggestion;
+                    const entry = suggestionDefinitions[suggestions.indexOf(suggestion)].join("\n").replaceAll("<BR>", "");
+                    li.innerHTML = entry.length > 100 ? entry.substring(0, 100) + "..." : entry;
+                    li.title = suggestion;
                     li.addEventListener("click", () => {
                         searchInput.value = suggestion;
                         search(true);
@@ -625,7 +667,7 @@
                 </g>
             </svg>
         </button>
-        <p id="info" title="Version">V260219</p>
+        <p id="info" title="Version">V260224</p>
     </div>
     <ul id="historyList" class="itemList"></ul>
 </div>
