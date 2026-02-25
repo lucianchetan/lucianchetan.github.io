@@ -16,6 +16,7 @@
             --color-background-hover: rgba(30, 144, 255, 0.35);
             --color-background-highlight: rgba(255, 187, 0, 0.75);
             --color-text-primary: #111;
+            --color-text-secondary: rgba(0, 0, 0, 0.50);
             --color-text-selection: white;
             --color-separator: #DDD;
 
@@ -38,6 +39,7 @@
                 --color-background-hover: rgba(0, 120, 212, 0.35);
                 --color-background-highlight: rgb(122, 90, 0);
                 --color-text-primary: #DDD;
+                --color-text-secondary: rgba(255, 255, 255, 0.50);
                 --color-text-selection: white;
                 --color-separator: #3D3D3D;
 
@@ -181,6 +183,11 @@
             left: anchor(--anchor_suggestions left);
         }
 
+        #suggestionsList .term {
+            text-decoration: none;
+            font-size: large;
+        }
+
         .itemList {
             list-style-type: none;
             margin: 0;
@@ -252,6 +259,7 @@
             user-select: none;
 
             border-radius: 0.25rem;
+            color: var(--color-text-secondary);
         }
 
         #info:hover {
@@ -667,7 +675,7 @@
                 </g>
             </svg>
         </button>
-        <p id="info" title="Version">V260224</p>
+        <p id="info" title="Version">V260225</p>
     </div>
     <ul id="historyList" class="itemList"></ul>
 </div>
