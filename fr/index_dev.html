@@ -129,9 +129,32 @@
         }
 
         #resultList li {
+            position: relative;
+
             padding: 1rem 1rem 1rem 3rem;
             text-indent: -2rem;
             border-bottom: 1px dotted var(--color-separator);
+        }
+
+        .termButton:hover {
+            opacity: 1;
+        }
+
+        .termButton {
+            opacity: 0;
+            position: absolute;
+            left: -0.25rem;
+            font-size: medium;
+
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            background-color: transparent;
+            border: none;
+            border-radius: 0.25rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin: 0;
+            padding: 0;
         }
 
         #resultList li:hover {
@@ -544,6 +567,14 @@
                     defs.forEach((def) => {
                         const li = document.createElement("li");
                         li.innerHTML = def;
+
+                        const button = document.createElement("button");
+                        button.className = "termButton";
+                        button.title = "Copy definition to clipboard";
+                        button.textContent = "⧉";
+                        button.onclick = () => navigator.clipboard.writeText(def);
+                        li.prepend(button);
+
                         resultList.appendChild(li);
                     });
                 }
