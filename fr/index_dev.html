@@ -132,31 +132,9 @@
 
         #resultList li {
             position: relative;
-
             padding: 1rem 1rem 1rem 3rem;
             text-indent: -2rem;
             border-bottom: 1px dotted var(--color-separator);
-        }
-
-        .sourceButton:hover {
-            opacity: 1;
-        }
-
-        .sourceButton {
-            opacity: 0;
-            position: absolute;
-            left: -0.25rem;
-            font-size: medium;
-
-            cursor: pointer;
-            color: var(--color-text-secondary);
-            background-color: transparent;
-            border: none;
-            border-radius: 0.25rem;
-            width: 1.5rem;
-            height: 1.5rem;
-            margin: 0;
-            padding: 0;
         }
 
         #sourcePopover {
@@ -181,12 +159,21 @@
         }
 
         .term {
+            font-weight: bold;
             text-decoration: underline;
             margin-right: 0.5rem;
         }
 
         .mute {
             opacity: 0.35;
+        }
+
+        .controlList {
+            flex-direction: row !important;
+        }
+
+        .controlList li {
+            padding: 0.25rem 0.5rem !important;
         }
 
         #history {
@@ -227,6 +214,9 @@
         }
 
         .itemList {
+            display: flex;
+            flex-direction: column;
+
             list-style-type: none;
             margin: 0;
             padding: 0;
@@ -319,7 +309,7 @@
             ]
         }
 
-        const definitions = new Map(); // { term : [definitions], etc. }
+        const definitions = new Map(); // { normalizedTerm : {term, [definitions]}, etc. }
         let terms = [];
         const history = [];
 
@@ -331,14 +321,15 @@
         let suggestionsPopover;
         let suggestionsList;
 
+        let controlPopover;
+        let sourceButton, littreButton, cnrtlButton, wiktionaryButton;
+
         let sourcePopover;
         let sourceLabel;
 
         let currentQuery = "";
         let selectedSuggestionIndex = -1;
         let shouldLookInside = false;
-
-        // const issues = new Map();
 
         [
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
@@ -352,35 +343,17 @@
 
                     const normalizedTerm = normalizeForSearch(term)
                         .replace("*", "");
-                    let defs = definitions.get(normalizedTerm);
-                    if (defs === undefined) {
-                        defs = [];
-                        definitions.set(normalizedTerm, defs);
-                    }
-                    if (mute) {
-                        defs.push(entry.replace("<B>*", "<span class='mute'>*</span><B class='term'>"));
-                    } else {
-                        defs.push(entry.replace("<B>", "<B class='term'>"));
+                    let termData = definitions.get(normalizedTerm);
+                    if (termData === undefined) {
+                        termData = {term: term.replace("*", ""), mute: mute, defs: []};
+                        definitions.set(normalizedTerm, termData);
                     }
 
-                    // const regex = /^[\*a-zàâãäçéèêëîïôöóûùüÿñæœ\s,\.~\-\(\)'\!/]+$/i;
-                    // if (!regex.test(term)) {
-                    //     console.error(term);
-                    // }
-
-                    // let i = term.indexOf("~");
-                    // if (i > 0) {
-                    //     let femininePlural = term.substring(i);
-                    //     var defs = issues.get(femininePlural);
-                    //     if (defs === undefined) {
-                    //         defs = [];
-                    //         issues.set(femininePlural, defs);
-                    //     }
-                    //     defs.push(term);
-                    // }
+                    let def = entry.substring(entry.indexOf("</B>") + 4);
+                    termData.defs.push(def);
                 }
             });
-        // console.log(issues);
+
         terms = [...definitions.keys()].sort();
         console.log(`Loaded ${definitions.size} definitions`);
 
@@ -392,6 +365,12 @@
 
             suggestionsPopover = document.getElementById("suggestionsPopover");
             suggestionsList = document.getElementById("suggestionsList");
+
+            controlPopover = document.getElementById("controlPopover");
+            sourceButton = document.getElementById("sourceButton");
+            littreButton = document.getElementById("littreButton");
+            cnrtlButton = document.getElementById("cnrtlButton");
+            wiktionaryButton = document.getElementById("wiktionaryButton");
 
             sourcePopover = document.getElementById("sourcePopover");
             sourceLabel = document.getElementById("sourceLabel");
@@ -499,26 +478,27 @@
             }
         }
 
-        function showSuggestionsPopover() {
-            if (!suggestionsPopover) return;
-            if (!suggestionsPopover.matches(":popover-open")) {
-                suggestionsPopover.showPopover();
-            }
-        }
-
         function hideSuggestionsPopover() {
-            if (!suggestionsPopover) return;
-            if (suggestionsPopover.matches(":popover-open")) {
-                suggestionsPopover.hidePopover();
-            }
+            hidePopover(suggestionsPopover);
             currentQuery = "";
             selectedSuggestionIndex = -1;
         }
 
-        function showSourcePopover() {
-            if (!sourcePopover) return;
-            if (!sourcePopover.matches(":popover-open")) {
-                sourcePopover.showPopover();
+        function showPopover(popover) {
+            if (!popover) {
+                return;
+            }
+            if (!popover.matches(":popover-open")) {
+                popover.showPopover();
+            }
+        }
+
+        function hidePopover(popover) {
+            if (!popover) {
+                return;
+            }
+            if (popover.matches(":popover-open")) {
+                popover.hidePopover();
             }
         }
 
@@ -529,11 +509,10 @@
             } else if (query !== currentQuery && query.length >= 1) {
                 currentQuery = normalizeForSearch(query);
                 const suggestions = [];
-                const suggestionDefinitions = [];
                 for (let i = 0; i < terms.length; i++) {
                     if (terms[i].startsWith(query)) {
-                        suggestions.push(terms[i]);
-                        suggestionDefinitions.push(definitions.get(terms[i]));
+                        let termData = definitions.get(terms[i]);
+                        suggestions.push(termData);
                         if (suggestions.length >= 10) {
                             break;
                         }
@@ -541,13 +520,12 @@
                 }
 
                 suggestionsList.textContent = "";
-                suggestions.forEach((suggestion) => {
+                suggestions.forEach((termData) => {
                     const li = document.createElement("li");
-                    const entry = suggestionDefinitions[suggestions.indexOf(suggestion)].join("\n").replaceAll("<BR>", "");
+                    const entry = "<B class='term'>" + termData.term + "</B>" + termData.defs.join("\n").replaceAll("<BR>", "");
                     li.innerHTML = entry.length > 100 ? entry.substring(0, 100) + "..." : entry;
-                    li.title = suggestion;
                     li.addEventListener("click", () => {
-                        searchInput.value = suggestion;
+                        searchInput.value = termData.term;
                         search(true);
                     })
                     suggestionsList.appendChild(li);
@@ -556,7 +534,7 @@
                 if (suggestions.length > 0) {
                     selectedSuggestionIndex = -1;
                     updateSuggestionSelection();
-                    showSuggestionsPopover();
+                    showPopover(suggestionsPopover);
                 } else {
                     hideSuggestionsPopover();
                 }
@@ -571,14 +549,14 @@
         function generateResults(query, shouldLookInside) {
             let count = 0;
             let isOneLetterQuery = query.length === 1;
-            definitions.forEach((defs, term) => {
+            definitions.forEach((termData, normalizedTerm) => {
                 let found = false;
                 if (isOneLetterQuery) {
-                    found = term === query;
+                    found = normalizedTerm === query;
 
                 } else if (shouldLookInside) {
-                    for (let i = 0; i < defs.length; i++) {
-                        let def = defs[i];
+                    for (let i = 0; i < termData.length; i++) {
+                        let def = termData[i];
                         let normalizedDef = normalizeForSearch(def);
                         if (normalizedDef.includes(query)) {
                             found = true;
@@ -587,30 +565,64 @@
                     }
 
                 } else {
-                    found = term.startsWith(query);
+                    found = normalizedTerm.startsWith(query);
                 }
 
                 if (found) {
-                    count++;
-                    defs.forEach((def) => {
+                    const term = termData.term;
+                    termData.defs.forEach((def) => {
+                        count++;
                         const li = document.createElement("li");
                         li.innerHTML = def;
 
-                        const button = document.createElement("button");
-                        button.className = "sourceButton";
-                        button.title = "Show source";
-                        button.textContent = "#";
-                        button.onclick = () => {
-                            sourceLabel.textContent = def;
-                            showSourcePopover();
+                        const termAnchorName = "--anchor_term_" + count;
+                        const termEl = document.createElement("span");
+                        termEl.className = "term";
+                        termEl.style.anchorName = termAnchorName;
+                        termEl.textContent = termData.term;
+                        termEl.onclick = () => {
+                            sourceButton.onclick = () => {
+                                sourceLabel.textContent = def;
+                                showPopover(sourcePopover);
+                            }
+                            const commaIndex = term.indexOf(",");
+                            const searchTerm = commaIndex > -1 ? term.substring(0, term.indexOf(",")) : term;
+                            littreButton.onclick = () => {
+                                hidePopover(controlPopover);
+                                openLink("https://www.littre.org/definition/" + searchTerm);
+                            }
+                            cnrtlButton.onclick = () => {
+                                hidePopover(controlPopover);
+                                openLink("https://www.cnrtl.fr/definition/" + searchTerm);
+                            }
+                            wiktionaryButton.onclick = () => {
+                                hidePopover(controlPopover);
+                                openLink("https://fr.wiktionary.org/wiki/" + searchTerm);
+                            }
+
+                            controlPopover.style.positionAnchor = termAnchorName;
+                            controlPopover.style.top = "anchor(" + termAnchorName + " bottom)";
+                            controlPopover.style.left = "anchor(" + termAnchorName + " left)";
+                            showPopover(controlPopover);
                         }
-                        li.prepend(button);
+                        li.prepend(termEl);
+
+                        if (termData.mute) {
+                            const muteEl = document.createElement("span");
+                            muteEl.className = "mute";
+                            muteEl.textContent = "*";
+                            li.prepend(muteEl);
+                        }
 
                         resultList.appendChild(li);
                     });
                 }
             });
             return count;
+        }
+
+        function openLink(url) {
+            window.open(url, "_blank")
         }
 
         function cleanupHighlights() {
@@ -724,6 +736,16 @@
     </div>
 
     <ul id="resultList"></ul>
+
+    <div id="controlPopover" popover="auto">
+        <ul class="itemList controlList">
+            <li id="littreButton">Littré</li>
+            <li id="cnrtlButton">CNRTL</li>
+            <li id="wiktionaryButton">Wiktionary</li>
+            <li id="sourceButton">Raw...</li>
+        </ul>
+    </div>
+
     <div id="sourcePopover" popover="auto">
         <code id="sourceLabel"></code>
     </div>
