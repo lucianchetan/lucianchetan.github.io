@@ -70,8 +70,10 @@
 
         [popover] {
             margin: 0;
-            padding: 0;
-            border: 0;
+            padding: 0.25rem;
+            border: 1px solid var(--color-background-selection);
+            background-color: var(--color-background-primary);
+            box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
         }
 
         #search {
@@ -136,11 +138,11 @@
             border-bottom: 1px dotted var(--color-separator);
         }
 
-        .termButton:hover {
+        .sourceButton:hover {
             opacity: 1;
         }
 
-        .termButton {
+        .sourceButton {
             opacity: 0;
             position: absolute;
             left: -0.25rem;
@@ -155,6 +157,23 @@
             height: 1.5rem;
             margin: 0;
             padding: 0;
+        }
+
+        #sourcePopover {
+            padding: 1rem;
+
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        #sourceLabel {
+            font-family: monospace;
         }
 
         #resultList li:hover {
@@ -196,11 +215,7 @@
             overflow-y: auto;
         }
 
-        [popover] {
-            border: 1px solid var(--color-background-selection);
-            background-color: var(--color-background-primary);
-            padding: 0.25rem;
-
+        #suggestionsPopover {
             position-anchor: --anchor_suggestions;
             top: anchor(--anchor_suggestions bottom);
             left: anchor(--anchor_suggestions left);
@@ -294,7 +309,7 @@
     <script lang="text/javascript" defer>
         const fr_dict = {
             "a": [
-                "<B>A, a</B> <I>s. m.</I><BR><BR> <B>1.</B> <I>(litera) </I>A, a;<B> depuis A jusqu'à Z</B> de la A la Z; de la alfa la omega; de la un cap la altul.<BR><BR> <B>2.</B> <I>(în expr.) f</I><B>ne savoir ni A ni B a.</B> a nu ști nimic;<B> b.</B> a nu ști carte;<B> prouver par A+B</B> a demonstra un lucru pe bază de dovezi.",
+                "<B>A, a</B> <I>s. m.</I><BR><BR> <B>1.</B> <I>(litera) </I>A, a;<B> depuis A jusqu'à Z</B> de la A la Z; de la alfa la omega; de la un cap la altul.<BR><BR> <B>2.</B> <I>(în expr.) </I><B>ne savoir ni A ni B a.</B> a nu ști nimic;<B> b.</B> a nu ști carte;<B> prouver par A+B</B> a demonstra un lucru pe bază de dovezi.",
                 "<B>à</B> <I>prep. </I>(<B>à + le</B> <I>se contractă: </I><B>au; à + les</B> <I>se contractă: </I><B>aux</B>) <BR><BR> <B>1.</B> la; <I>(local) </I><B>vivre ~ la campagne</B> a trăi la țară; <B>un voyage ~ Madrid</B> o călătorie la Madrid; <I>(temporal) </I><B>~ midi</B> la amiază; <I>(sport)</I> <B>~ la mi - temps</B> la pauză; <B>~ la nuit close</B> la căderea nopții.<BR><BR> <B>2.</B> până la; <B>je suis chez moi de 5h. ~ 7h.</B> sunt acasă de la ora 5 până la ora 7. <BR><BR> <B>3.</B> cu; <B>il neigeait ~ gros flocons</B> ningea cu fulgi mari; <B>~ (mon) regret</B> cu regret; cu tot regretul; <B>mot ~ mot</B> cuvânt cu cuvânt; <B>avancer ~ grands pas</B> a înainta cu pași mari; <B>une porte ~ deux battants</B> o ușă cu două canaturi; <B>moteur ~ explosion</B> motor cu explozie; <B>~ condition de</B> cu condiția; <B>~ grand-peine</B> cu chiu cu vai; cu mare caznă; <B>~ haute voix</B> cu voce tare; <B>~ la longue</B> cu timpul; în cele din urmă. <BR><BR> <B>4.</B> de; <B>facile ~ dire</B> ușor de spus; <B>mesures ~ prendre</B> măsuri de luat; <B>blesser ~ mort</B> a răni de moarte; <B>une fourrure ~ trois millions</B> o blană de trei milioane; <B>~ vendre</B> de vânzare; <B>~ merveille</B> de minune. <BR><BR> <B>5.</B> pe; <B>~ pied</B> pe jos; <B>~ faux</B> pe nedrept; <B>~ l'intérieur</B> pe dinăuntru; <B>~ l'envers</B> pe dos, alandala; <B>acheter ~ crédit</B> a cumpăra pe credit / pe datorie; <I>(prov.) </I><B>ne remets jamais au lendemain ce que tu peux faire aujourd'hui</B> nu lăsa pe mâine ce poți face azi; <B>s'abonner ~ l'année</B> a se abona pe un an întreg. <BR><BR> <B>6.</B> după, conform, potrivit cu; <B>~ mon avis</B> după părerea mea; <B>s'habiller ~ la mode de Paris</B> a se îmbrăca după moda de la Paris; <B>~ ce qu'il dit</B> după câte spune. <BR><BR> <B>7.</B> ca; în calitate de; <B>prendre ~ témoin</B> a lua ca martor. <BR><BR> <B>8.</B> în; <B>~ ciel ouvert</B> în aer liber; <B>~ contre-poil</B> în răspăr; <B>~ contre-cœur</B> în silă; fără plăcere; <B>~ cet égard</B> în această privință; <B>~ cet effet</B> în acest scop; <B>~ défaut de a.</B> în lipsă de; <B>b.</B> în loc de; <B>~ bref délai</B> în curând; în scurt timp; <B>~ coup sûr</B> în mod sigur; cu siguranță; <B>~ la brune</B> în amurg; în faptul serii; <B>~ la fin</B> în cele din urmă; până la urmă; <B>~ la fois</B> în același timp; totodată; <B>~ l'aise</B> în voie; <B>~ l'aube</B> în zori; <B>~ la hâte</B> în grabă; în pripă; <B>~ votre santé</B> în sănătatea dv. <BR><BR> <B>9.</B> câte; <B>peu ~ peu, petit ~ petit</B> puțin câte puțin. <B>10.</B> din; <B>~ nouveau</B> din nou; <B>~ brûle-chandail</B> din senin; hodoronc-tronc; <B>~ cause de</B> din cauza. <BR><BR> <B>11.</B> (introduce un complement indirect; se traduce prin dativ) <B>offre ces fleurs ~ ta sœur</B> oferă aceste flori surorii tale. <BR><BR> <B>12.</B> (introduce un complement indirect; se traduce printr-un gen. sau adj. pos.) <B>cette cravate est ~ Roger</B> această cravată este a lui Roger; <B>c'est un parent ~ elle</B> este o rudă de-a ei. <BR><BR> <B>13.</B> <I>(în expr.)</I> <B>~ bon compte / marché</B> ieftin; <B>~ ce compte</B> dacă așa stau lucrurile; dacă e vorba pe așa; <B>~ cheval</B> călare; <B>~ compter de</B> începând cu; <B>agir au nez et ~ la barbe de qqn.</B> a acționa sub nasul cuiva; <B>~ la bonne heure</B> (să fie) într-un ceas bun; <B>~ la diable</B> rasolit; făcut de mântuială; cum dă Dumnezeu; <B>~ la lettre</B> aidoma; întocmai; literă cu literă; <B>~ la seule pensée de</B> numai la gândul că; <B>~ l'en croire</B> dacă ne-am lua după el; dac-ar fi să-i dăm crezare; <B>~ moins que</B> afară, numai dacă; <B>mettre qqn. ~ bout</B> a scoate din sărite pe cineva; <B>fils ~ papa</B> fecior de bani gata; <B>au secours!</B> ajutor! <B>la rédaction de ce projet nous prendra deux ~ trois jours</B> redactarea acestui proiect ne va lua două-trei zile; <B>il consent ~ témoigner</B> consimte să depună mărturie.",
                 "<B>abaca</B> <I>s.m. </I>fibră textilă extrasă din frunzele unui bananier.",
                 "<B>abacule</B> <I>s.m. </I>mic cub dintr-un mozaic.",
@@ -315,6 +330,9 @@
 
         let suggestionsPopover;
         let suggestionsList;
+
+        let sourcePopover;
+        let sourceLabel;
 
         let currentQuery = "";
         let selectedSuggestionIndex = -1;
@@ -374,6 +392,9 @@
 
             suggestionsPopover = document.getElementById("suggestionsPopover");
             suggestionsList = document.getElementById("suggestionsList");
+
+            sourcePopover = document.getElementById("sourcePopover");
+            sourceLabel = document.getElementById("sourceLabel");
 
             searchInput.addEventListener("keyup", processInputChange);
 
@@ -494,6 +515,13 @@
             selectedSuggestionIndex = -1;
         }
 
+        function showSourcePopover() {
+            if (!sourcePopover) return;
+            if (!sourcePopover.matches(":popover-open")) {
+                sourcePopover.showPopover();
+            }
+        }
+
         function suggest() {
             const query = searchInput.value.trim();
             if (query.length === 0) {
@@ -569,10 +597,13 @@
                         li.innerHTML = def;
 
                         const button = document.createElement("button");
-                        button.className = "termButton";
-                        button.title = "Copy definition to clipboard";
-                        button.textContent = "⧉";
-                        button.onclick = () => navigator.clipboard.writeText(def);
+                        button.className = "sourceButton";
+                        button.title = "Show source";
+                        button.textContent = "#";
+                        button.onclick = () => {
+                            sourceLabel.textContent = def;
+                            showSourcePopover();
+                        }
                         li.prepend(button);
 
                         resultList.appendChild(li);
@@ -693,6 +724,10 @@
     </div>
 
     <ul id="resultList"></ul>
+    <div id="sourcePopover" popover="auto">
+        <code id="sourceLabel"></code>
+    </div>
+
 </div>
 <div id="history">
     <div id="historyHeader">
@@ -706,7 +741,7 @@
                 </g>
             </svg>
         </button>
-        <p id="info" title="Version">V260225</p>
+        <p id="info" title="Version">V260301</p>
     </div>
     <ul id="historyList" class="itemList"></ul>
 </div>
