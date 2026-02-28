@@ -34,11 +34,11 @@
                 --color-background-primary: #1E1E1E;
                 --color-background-search: #2D2D2D;
                 --color-background-history: #252525;
-                --color-background-result-hover: #2D2D2D;
+                --color-background-result-hover: #222;
                 --color-background-selection: #0078D4;
                 --color-background-hover: rgba(0, 120, 212, 0.35);
                 --color-background-highlight: rgb(122, 90, 0);
-                --color-text-primary: #DDD;
+                --color-text-primary: #E8E8E8;
                 --color-text-secondary: rgba(255, 255, 255, 0.50);
                 --color-text-selection: white;
                 --color-separator: #3D3D3D;
@@ -152,6 +152,7 @@
 
         #sourceLabel {
             font-family: monospace;
+            color: var(--color-text-primary);
         }
 
         #resultList li:hover {
@@ -522,6 +523,7 @@
                 suggestionsList.textContent = "";
                 suggestions.forEach((termData) => {
                     const li = document.createElement("li");
+                    li.title = termData.term;
                     const entry = "<B class='term'>" + termData.term + "</B>" + termData.defs.join("\n").replaceAll("<BR>", "");
                     li.innerHTML = entry.length > 100 ? entry.substring(0, 100) + "..." : entry;
                     li.addEventListener("click", () => {
