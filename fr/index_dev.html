@@ -68,6 +68,12 @@
             background-color: var(--color-background-primary);
         }
 
+        .separator {
+            width: 1px;
+            height: 24px;
+            background-color: var(--color-separator);
+        }
+
         [popover] {
             margin: 0;
             padding: 0.25rem;
@@ -138,6 +144,7 @@
         }
 
         #sourcePopover {
+            background-color: var(--color-background-selection);
             padding: 1rem;
 
             position: fixed;
@@ -152,7 +159,13 @@
 
         #sourceLabel {
             font-family: monospace;
-            color: var(--color-text-primary);
+            font-weight: bold;
+
+            color: var(--color-text-selection);
+            margin: 0;
+            padding: 0;
+            border: none;
+            outline: none;
         }
 
         #resultList li:hover {
@@ -160,6 +173,7 @@
         }
 
         .term {
+            font-size: large;
             font-weight: bold;
             text-decoration: underline;
             margin-right: 0.5rem;
@@ -171,9 +185,13 @@
 
         .controlList {
             flex-direction: row !important;
+            gap: 0.25rem;
+            align-items: center;
         }
 
         .controlList li {
+            display: flex;
+            gap: 0.5rem;
             padding: 0.25rem 0.5rem !important;
         }
 
@@ -310,7 +328,7 @@
             ]
         }
 
-        const definitions = new Map(); // { normalizedTerm : {term, [definitions]}, etc. }
+        const definitions = new Map(); // { normalizedTerm : {term, mute, [definitions]}, etc. }
         let terms = [];
         const history = [];
 
@@ -323,7 +341,7 @@
         let suggestionsList;
 
         let controlPopover;
-        let sourceButton, littreButton, cnrtlButton, wiktionaryButton;
+        let littreButton, cnrtlButton, wiktionaryButton, sourceButton, reportButton;
 
         let sourcePopover;
         let sourceLabel;
@@ -332,28 +350,8 @@
         let selectedSuggestionIndex = -1;
         let shouldLookInside = false;
 
-        [
-            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-        ]
-            .flatMap(letter => fr_dict[letter])
-            .forEach(entry => {
-                if (entry !== undefined && entry.startsWith("<B>")) {
-                    const term = entry.substring(3, entry.indexOf("</B>"));
-                    const mute = term.startsWith("*");
-
-                    const normalizedTerm = normalizeForSearch(term)
-                        .replace("*", "");
-                    let termData = definitions.get(normalizedTerm);
-                    if (termData === undefined) {
-                        termData = {term: term.replace("*", ""), mute: mute, defs: []};
-                        definitions.set(normalizedTerm, termData);
-                    }
-
-                    let def = entry.substring(entry.indexOf("</B>") + 4);
-                    termData.defs.push(def);
-                }
-            });
+        readDictionaryData();
+        readCorrectedDictionaryData();
 
         terms = [...definitions.keys()].sort();
         console.log(`Loaded ${definitions.size} definitions`);
@@ -368,16 +366,16 @@
             suggestionsList = document.getElementById("suggestionsList");
 
             controlPopover = document.getElementById("controlPopover");
-            sourceButton = document.getElementById("sourceButton");
             littreButton = document.getElementById("littreButton");
             cnrtlButton = document.getElementById("cnrtlButton");
             wiktionaryButton = document.getElementById("wiktionaryButton");
+            sourceButton = document.getElementById("sourceButton");
+            reportButton = document.getElementById("reportButton");
 
             sourcePopover = document.getElementById("sourcePopover");
             sourceLabel = document.getElementById("sourceLabel");
 
             searchInput.addEventListener("keyup", processInputChange);
-
             searchInput.addEventListener("mouseenter", () => {
                 searchInput.focus();
                 searchInput.select();
@@ -392,6 +390,63 @@
         });
 
         ///
+
+        function processDef(term, entry) {
+            const def = entry.substring(entry.indexOf("</B>") + 4);
+            const commaIndex = term.indexOf(",");
+            const subterm = commaIndex > -1 ? term.substring(0, commaIndex) : term;
+            return def.replaceAll("~", `<U>${subterm.replace("*", "")}</U>`);
+        }
+
+        function readDictionaryData() {
+            [
+                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+            ]
+                .flatMap(letter => fr_dict[letter])
+                .forEach((entry) => {
+                    if (entry !== undefined && entry.startsWith("<B>")) {
+                        const term = entry.substring(3, entry.indexOf("</B>"));
+                        const mute = term.startsWith("*");
+
+                        const normalizedTerm = normalizeForSearch(term)
+                            .replace("*", "");
+                        let termData = definitions.get(normalizedTerm);
+                        if (termData === undefined) {
+                            termData = {term: term.replace("*", ""), mute: mute, defs: []};
+                            definitions.set(normalizedTerm, termData);
+                        }
+
+                        termData.defs.push(processDef(term, entry));
+                    }
+                });
+        }
+
+        function readCorrectedDictionaryData() {
+            window.fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQLq5WSntmnMpg4_kpAXlP5z-knal1u_aYpcqCk-6SxbHnx8fw6ddWwsES7D2cwSCTpj1TrrerCsU8j/pub?gid=25454357&single=true&output=tsv")
+                .then(response => response.text())
+                .then(text => {
+                    console.log("Reading corrected dictionary data...");
+                    const lines = text.split("\r\n");
+                    lines.forEach(line => {
+                        const parts = line.split("\t");
+                        if (parts.length >= 4) {
+                            try {
+                                const term = parts[1];
+                                const index = parts[2];
+                                const def = parts[3];
+                                const termData = definitions.get(term);
+                                if (termData !== undefined && def !== undefined && def.length > 0) {
+                                    termData.defs[index] = processDef(termData.term, def);
+                                    console.log("Stored correction:", parts);
+                                }
+                            } catch (e) {
+                                console.error("Error reading corrected dictionary data:", e);
+                            }
+                        }
+                    });
+                });
+        }
 
         const IGNORED_KEYS = new Set(["Tab", "Shift", "Control", "Alt", "Meta", "CapsLock", "ArrowLeft", "ArrowRight"]);
 
@@ -557,10 +612,11 @@
                     found = normalizedTerm === query;
 
                 } else if (shouldLookInside) {
-                    for (let i = 0; i < termData.length; i++) {
-                        let def = termData[i];
+                    for (let i = 0; i < termData.defs.length; i++) {
+                        let def = termData.defs[i];
                         let normalizedDef = normalizeForSearch(def);
-                        if (normalizedDef.includes(query)) {
+                        let textOnlyDef = normalizedDef.replace(/<[^>]*>/g, "");
+                        if (textOnlyDef.includes(query)) {
                             found = true;
                             break;
                         }
@@ -572,7 +628,7 @@
 
                 if (found) {
                     const term = termData.term;
-                    termData.defs.forEach((def) => {
+                    termData.defs.forEach((def, index) => {
                         count++;
                         const li = document.createElement("li");
                         li.innerHTML = def;
@@ -581,12 +637,17 @@
                         const termEl = document.createElement("span");
                         termEl.className = "term";
                         termEl.style.anchorName = termAnchorName;
-                        termEl.textContent = termData.term;
+                        termEl.textContent = term;
                         termEl.onclick = () => {
                             sourceButton.onclick = () => {
-                                sourceLabel.textContent = def;
+                                sourceLabel.textContent = `<B>${termData.mute ? "*" : ""}${termData.term}</B> ${def}`;
                                 showPopover(sourcePopover);
                             }
+
+                            reportButton.onclick = () => {
+                                reportDefinition(normalizedTerm, index);
+                                hidePopover(controlPopover);
+                            };
                             const commaIndex = term.indexOf(",");
                             const searchTerm = commaIndex > -1 ? term.substring(0, term.indexOf(",")) : term;
                             littreButton.onclick = () => {
@@ -712,6 +773,15 @@
             searchInput.value = query;
             search(false);
         }
+
+        function reportDefinition(term, index) {
+            const url = `https://docs.google.com/forms/d/e/1FAIpQLSfvDmSBcWPNiWHgPTWqXRikONgijGEXMPUtHloRQuVCZ8Q2wQ/` +
+                `formResponse?usp=pp_url` +
+                `&entry.1299933712=${window.encodeURIComponent(index)}` +
+                `&entry.1567861638=${window.encodeURIComponent(term)}` +
+                `&submit=Submit`
+            openLink(url);
+        }
     </script>
 </head>
 
@@ -744,12 +814,23 @@
             <li id="littreButton">Littré</li>
             <li id="cnrtlButton">CNRTL</li>
             <li id="wiktionaryButton">Wiktionary</li>
-            <li id="sourceButton">Raw...</li>
+            <div class="separator"></div>
+            <li id="sourceButton">Source...</li>
+            <li id="reportButton">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.625 17.1641" width="24" fill="currentColor">
+                    <g>
+                        <rect height="17.1641" opacity="0" width="17.625" x="0" y="0"/>
+                        <path d="M4.80469 17.1641C5.1875 17.1641 5.45312 16.9609 5.92969 16.5391L8.625 14.1406L13.6406 14.1406C15.9688 14.1406 17.2188 12.8516 17.2188 10.5625L17.2188 4.57812C17.2188 2.28906 15.9688 1 13.6406 1L3.57812 1C1.25 1 0 2.28125 0 4.57812L0 10.5625C0 12.8594 1.25 14.1406 3.57812 14.1406L3.95312 14.1406L3.95312 16.1719C3.95312 16.7734 4.25781 17.1641 4.80469 17.1641ZM5.125 15.7344L5.125 13.4688C5.125 13.0469 4.96094 12.8828 4.53906 12.8828L3.57812 12.8828C2 12.8828 1.25781 12.0781 1.25781 10.5547L1.25781 4.57812C1.25781 3.05469 2 2.25781 3.57812 2.25781L13.6406 2.25781C15.2109 2.25781 15.9609 3.05469 15.9609 4.57812L15.9609 10.5547C15.9609 12.0781 15.2109 12.8828 13.6406 12.8828L8.57812 12.8828C8.14062 12.8828 7.92188 12.9453 7.625 13.25Z"/>
+                        <path d="M8.60938 8.97656C8.98438 8.97656 9.20312 8.76562 9.21094 8.35938L9.32031 4.23438C9.32812 3.84375 9.01562 3.53906 8.60156 3.53906C8.17969 3.53906 7.88281 3.83594 7.89062 4.22656L7.99219 8.35938C8 8.75781 8.21875 8.97656 8.60938 8.97656ZM8.60938 11.5156C9.0625 11.5156 9.45312 11.1641 9.45312 10.7031C9.45312 10.25 9.07031 9.89844 8.60938 9.89844C8.14844 9.89844 7.76562 10.2578 7.76562 10.7031C7.76562 11.1562 8.15625 11.5156 8.60938 11.5156Z"/>
+                    </g>
+                </svg>
+                Report
+            </li>
         </ul>
     </div>
 
     <div id="sourcePopover" popover="auto">
-        <code id="sourceLabel"></code>
+        <p id="sourceLabel" contenteditable="true"></p>
     </div>
 
 </div>
