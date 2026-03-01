@@ -143,6 +143,14 @@
             border-bottom: 1px dotted var(--color-separator);
         }
 
+        #resultList li b {
+            color: red;
+        }
+
+        #resultList li i {
+            color: green;
+        }
+
         #sourcePopover {
             background-color: var(--color-background-selection);
             padding: 1rem;
@@ -407,17 +415,17 @@
                 .forEach((entry) => {
                     if (entry !== undefined && entry.startsWith("<B>")) {
                         const term = entry.substring(3, entry.indexOf("</B>"));
-                        const mute = term.startsWith("*");
+                        const isMute = term.startsWith("*");
 
                         const normalizedTerm = normalizeForSearch(term)
                             .replace("*", "");
                         let termData = definitions.get(normalizedTerm);
                         if (termData === undefined) {
-                            termData = {term: term.replace("*", ""), mute: mute, defs: []};
+                            termData = {term: term.replace("*", ""), mute: isMute, defs: []};
                             definitions.set(normalizedTerm, termData);
                         }
 
-                        termData.defs.push(processDef(term, entry));
+                        termData.defs.push(entry);
                     }
                 });
         }
@@ -437,7 +445,7 @@
                                 const def = parts[3];
                                 const termData = definitions.get(term);
                                 if (termData !== undefined && def !== undefined && def.length > 0) {
-                                    termData.defs[index] = processDef(termData.term, def);
+                                    termData.defs[index] = def;
                                     console.log("Stored correction:", parts);
                                 }
                             } catch (e) {
@@ -569,7 +577,7 @@
                     if (terms[i].startsWith(query)) {
                         let termData = definitions.get(terms[i]);
                         suggestions.push(termData);
-                        if (suggestions.length >= 10) {
+                        if (suggestions.length >= 12) {
                             break;
                         }
                     }
@@ -579,7 +587,7 @@
                 suggestions.forEach((termData) => {
                     const li = document.createElement("li");
                     li.title = termData.term;
-                    const entry = "<B class='term'>" + termData.term + "</B>" + termData.defs.join("\n").replaceAll("<BR>", "");
+                    const entry = termData.defs.join("\n").replaceAll("<BR>", "");
                     li.innerHTML = entry.length > 100 ? entry.substring(0, 100) + "..." : entry;
                     li.addEventListener("click", () => {
                         searchInput.value = termData.term;
@@ -631,7 +639,7 @@
                     termData.defs.forEach((def, index) => {
                         count++;
                         const li = document.createElement("li");
-                        li.innerHTML = def;
+                        li.innerHTML = processDef(term, def);
 
                         const termAnchorName = "--anchor_term_" + count;
                         const termEl = document.createElement("span");
@@ -640,14 +648,14 @@
                         termEl.textContent = term;
                         termEl.onclick = () => {
                             sourceButton.onclick = () => {
-                                sourceLabel.textContent = `<B>${termData.mute ? "*" : ""}${termData.term}</B> ${def}`;
+                                sourceLabel.textContent = def;
                                 showPopover(sourcePopover);
                             }
-
                             reportButton.onclick = () => {
                                 reportDefinition(normalizedTerm, index);
                                 hidePopover(controlPopover);
                             };
+
                             const commaIndex = term.indexOf(",");
                             const searchTerm = commaIndex > -1 ? term.substring(0, term.indexOf(",")) : term;
                             littreButton.onclick = () => {
