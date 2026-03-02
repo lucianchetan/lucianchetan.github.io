@@ -4,339 +4,13 @@
 <head>
     <title>FR-RO</title>
     <meta charset="UTF-8"/>
-    <link rel="icon" type="image/png" href="fr/favicon.png">
 
-    <style>
-        :root {
-            --color-background-primary: #FFF;
-            --color-background-search: #F4F4F4;
-            --color-background-history: #F8F8F8;
-            --color-background-result-hover: #F8F8F8;
-            --color-background-selection: dodgerblue;
-            --color-background-hover: rgba(30, 144, 255, 0.35);
-            --color-background-highlight: rgba(255, 187, 0, 0.75);
-            --color-text-primary: #111;
-            --color-text-secondary: rgba(0, 0, 0, 0.50);
-            --color-text-selection: white;
-            --color-separator: #DDD;
-
-            --color-button-background: rgba(0, 0, 0, 0.05);
-            --color-button-background-hover: rgba(0, 0, 0, 0.15);
-            --color-button-background-active: rgba(0, 0, 0, 0.3);
-            --color-button-background-selected: dodgerblue;
-            --color-button-background-selected-hover: #0085ff;
-
-            --color-input-background: white;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --color-background-primary: #1E1E1E;
-                --color-background-search: #2D2D2D;
-                --color-background-history: #252525;
-                --color-background-result-hover: #222;
-                --color-background-selection: #0078D4;
-                --color-background-hover: rgba(0, 120, 212, 0.35);
-                --color-background-highlight: rgb(122, 90, 0);
-                --color-text-primary: #E8E8E8;
-                --color-text-secondary: rgba(255, 255, 255, 0.50);
-                --color-text-selection: white;
-                --color-separator: #3D3D3D;
-
-                --color-button-background: rgba(255, 255, 255, 0.08);
-                --color-button-background-hover: rgba(255, 255, 255, 0.15);
-                --color-button-background-active: rgba(255, 255, 255, 0.25);
-                --color-button-background-selected: dodgerblue;
-                --color-button-background-selected-hover: #1084D8;
-
-                --color-input-background: #222;
-            }
-        }
-
-        body {
-            font-family: "Arial", serif;
-            line-height: 1.5rem;
-
-            display: flex;
-            align-items: stretch;
-            gap: 0;
-
-            margin: 0;
-            height: 100vh;
-
-            color: var(--color-text-primary);
-            background-color: var(--color-background-primary);
-        }
-
-        .separator {
-            width: 1px;
-            height: 24px;
-            background-color: var(--color-separator);
-        }
-
-        [popover] {
-            margin: 0;
-            padding: 0.25rem;
-            border: 1px solid var(--color-background-selection);
-            background-color: var(--color-background-primary);
-            box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
-        }
-
-        #search {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            align-items: stretch;
-        }
-
-        #searchHeader {
-            display: flex;
-            flex-direction: row;
-            gap: 1rem;
-
-            padding: 1rem;
-            background-color: var(--color-background-search);
-            border-bottom: 1px solid var(--color-separator);
-        }
-
-        #searchBox {
-            display: flex;
-            align-items: center;
-            width: 400px;
-            position: relative;
-        }
-
-        #searchInput {
-            color: var(--color-text-primary);
-            background-color: var(--color-input-background);
-            border: 1px solid var(--color-separator);
-            border-radius: 0.5rem;
-
-            flex-grow: 1;
-            width: 100%;
-
-            padding: 0.5rem;
-            margin: 0;
-
-            font-size: x-large;
-            font-weight: bold;
-
-            anchor-name: --anchor_suggestions;
-        }
-
-        #lookInsideButton {
-            position: absolute;
-            right: 0.5rem;
-        }
-
-        #resultList {
-            overflow-y: auto;
-            list-style-type: none;
-            margin: 0;
-            padding: 0 0 1rem;
-        }
-
-        #resultList li {
-            position: relative;
-            padding: 1rem 1rem 1rem 3rem;
-            text-indent: -2rem;
-            border-bottom: 1px dotted var(--color-separator);
-        }
-
-        #resultList li b {
-            color: red;
-        }
-
-        #resultList li i {
-            color: green;
-        }
-
-        #sourcePopover {
-            background-color: var(--color-background-selection);
-            padding: 1rem;
-
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            max-width: 90%;
-            max-height: 80vh;
-            overflow: auto;
-        }
-
-        #sourceLabel {
-            font-family: monospace;
-            font-weight: bold;
-
-            color: var(--color-text-selection);
-            margin: 0;
-            padding: 0;
-            border: none;
-            outline: none;
-        }
-
-        #resultList li:hover {
-            background-color: var(--color-background-result-hover);
-        }
-
-        .term {
-            font-size: large;
-            font-weight: bold;
-            text-decoration: underline;
-            margin-right: 0.5rem;
-        }
-
-        .mute {
-            opacity: 0.35;
-        }
-
-        .controlList {
-            flex-direction: row !important;
-            gap: 0.25rem;
-            align-items: center;
-        }
-
-        .controlList li {
-            display: flex;
-            gap: 0.5rem;
-            padding: 0.25rem 0.5rem !important;
-        }
-
-        #history {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-
-            min-width: 150px;
-            max-width: 150px;
-            padding: 0.5rem;
-            background-color: var(--color-background-history);
-            border-left: 1px solid var(--color-separator);
-        }
-
-        #historyHeader {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-            padding-inline-start: 0.5rem;
-            padding-block-start: 0.5rem;
-        }
-
-        #historyList {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-
-        #suggestionsPopover {
-            position-anchor: --anchor_suggestions;
-            top: anchor(--anchor_suggestions bottom);
-            left: anchor(--anchor_suggestions left);
-        }
-
-        #suggestionsList .term {
-            text-decoration: none;
-            font-size: large;
-        }
-
-        .itemList {
-            display: flex;
-            flex-direction: column;
-
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .itemList li {
-            margin: 0;
-            padding: 0.25rem 2rem 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            color: var(--color-text-primary);
-        }
-
-        .itemList li:hover {
-            background-color: var(--color-background-hover);
-            cursor: pointer;
-        }
-
-        .itemList li.selected {
-            background-color: var(--color-background-selection);
-            color: var(--color-text-selection);
-        }
-
-        .iconButton {
-            cursor: pointer;
-            color: var(--color-text-primary);
-            background-color: var(--color-button-background);
-            border: none;
-            border-radius: 0.25rem;
-            width: 2rem;
-            height: 2rem;
-            margin: 0;
-            padding: 0;
-        }
-
-        .iconButton:hover {
-            background-color: var(--color-button-background-hover);
-        }
-
-        .iconButton:active {
-            background-color: var(--color-button-background-active);
-        }
-
-        .iconButton.selected {
-            background-color: var(--color-background-selection);
-            color: var(--color-text-selection);
-        }
-
-        .iconButton:hover.selected {
-            background-color: var(--color-button-background-selected-hover);
-            color: var(--color-text-selection);
-        }
-
-        ::highlight(search-results) {
-            background-color: var(--color-background-highlight);
-        }
-
-        ::selection {
-            color: var(--color-text-selection);
-            background-color: var(--color-background-selection);
-        }
-
-        #info {
-            padding: 0.25rem;
-            margin: 0;
-
-            font-size: x-small;
-            text-box-trim: trim-both;
-            user-select: none;
-
-            border-radius: 0.25rem;
-            color: var(--color-text-secondary);
-        }
-
-        #info:hover {
-            color: var(--color-text-selection);
-            background: var(--color-background-selection);
-        }
-    </style>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 
     <script lang="text/javascript" defer>
-        const fr_dict = {
-            "a": [
-                "<B>A, a</B> <I>s. m.</I><BR><BR> <B>1.</B> <I>(litera) </I>A, a;<B> depuis A jusqu'à Z</B> de la A la Z; de la alfa la omega; de la un cap la altul.<BR><BR> <B>2.</B> <I>(în expr.) </I><B>ne savoir ni A ni B a.</B> a nu ști nimic;<B> b.</B> a nu ști carte;<B> prouver par A+B</B> a demonstra un lucru pe bază de dovezi.",
-                "<B>à</B> <I>prep. </I>(<B>à + le</B> <I>se contractă: </I><B>au; à + les</B> <I>se contractă: </I><B>aux</B>) <BR><BR> <B>1.</B> la; <I>(local) </I><B>vivre ~ la campagne</B> a trăi la țară; <B>un voyage ~ Madrid</B> o călătorie la Madrid; <I>(temporal) </I><B>~ midi</B> la amiază; <I>(sport)</I> <B>~ la mi - temps</B> la pauză; <B>~ la nuit close</B> la căderea nopții.<BR><BR> <B>2.</B> până la; <B>je suis chez moi de 5h. ~ 7h.</B> sunt acasă de la ora 5 până la ora 7. <BR><BR> <B>3.</B> cu; <B>il neigeait ~ gros flocons</B> ningea cu fulgi mari; <B>~ (mon) regret</B> cu regret; cu tot regretul; <B>mot ~ mot</B> cuvânt cu cuvânt; <B>avancer ~ grands pas</B> a înainta cu pași mari; <B>une porte ~ deux battants</B> o ușă cu două canaturi; <B>moteur ~ explosion</B> motor cu explozie; <B>~ condition de</B> cu condiția; <B>~ grand-peine</B> cu chiu cu vai; cu mare caznă; <B>~ haute voix</B> cu voce tare; <B>~ la longue</B> cu timpul; în cele din urmă. <BR><BR> <B>4.</B> de; <B>facile ~ dire</B> ușor de spus; <B>mesures ~ prendre</B> măsuri de luat; <B>blesser ~ mort</B> a răni de moarte; <B>une fourrure ~ trois millions</B> o blană de trei milioane; <B>~ vendre</B> de vânzare; <B>~ merveille</B> de minune. <BR><BR> <B>5.</B> pe; <B>~ pied</B> pe jos; <B>~ faux</B> pe nedrept; <B>~ l'intérieur</B> pe dinăuntru; <B>~ l'envers</B> pe dos, alandala; <B>acheter ~ crédit</B> a cumpăra pe credit / pe datorie; <I>(prov.) </I><B>ne remets jamais au lendemain ce que tu peux faire aujourd'hui</B> nu lăsa pe mâine ce poți face azi; <B>s'abonner ~ l'année</B> a se abona pe un an întreg. <BR><BR> <B>6.</B> după, conform, potrivit cu; <B>~ mon avis</B> după părerea mea; <B>s'habiller ~ la mode de Paris</B> a se îmbrăca după moda de la Paris; <B>~ ce qu'il dit</B> după câte spune. <BR><BR> <B>7.</B> ca; în calitate de; <B>prendre ~ témoin</B> a lua ca martor. <BR><BR> <B>8.</B> în; <B>~ ciel ouvert</B> în aer liber; <B>~ contre-poil</B> în răspăr; <B>~ contre-cœur</B> în silă; fără plăcere; <B>~ cet égard</B> în această privință; <B>~ cet effet</B> în acest scop; <B>~ défaut de a.</B> în lipsă de; <B>b.</B> în loc de; <B>~ bref délai</B> în curând; în scurt timp; <B>~ coup sûr</B> în mod sigur; cu siguranță; <B>~ la brune</B> în amurg; în faptul serii; <B>~ la fin</B> în cele din urmă; până la urmă; <B>~ la fois</B> în același timp; totodată; <B>~ l'aise</B> în voie; <B>~ l'aube</B> în zori; <B>~ la hâte</B> în grabă; în pripă; <B>~ votre santé</B> în sănătatea dv. <BR><BR> <B>9.</B> câte; <B>peu ~ peu, petit ~ petit</B> puțin câte puțin. <B>10.</B> din; <B>~ nouveau</B> din nou; <B>~ brûle-chandail</B> din senin; hodoronc-tronc; <B>~ cause de</B> din cauza. <BR><BR> <B>11.</B> (introduce un complement indirect; se traduce prin dativ) <B>offre ces fleurs ~ ta sœur</B> oferă aceste flori surorii tale. <BR><BR> <B>12.</B> (introduce un complement indirect; se traduce printr-un gen. sau adj. pos.) <B>cette cravate est ~ Roger</B> această cravată este a lui Roger; <B>c'est un parent ~ elle</B> este o rudă de-a ei. <BR><BR> <B>13.</B> <I>(în expr.)</I> <B>~ bon compte / marché</B> ieftin; <B>~ ce compte</B> dacă așa stau lucrurile; dacă e vorba pe așa; <B>~ cheval</B> călare; <B>~ compter de</B> începând cu; <B>agir au nez et ~ la barbe de qqn.</B> a acționa sub nasul cuiva; <B>~ la bonne heure</B> (să fie) într-un ceas bun; <B>~ la diable</B> rasolit; făcut de mântuială; cum dă Dumnezeu; <B>~ la lettre</B> aidoma; întocmai; literă cu literă; <B>~ la seule pensée de</B> numai la gândul că; <B>~ l'en croire</B> dacă ne-am lua după el; dac-ar fi să-i dăm crezare; <B>~ moins que</B> afară, numai dacă; <B>mettre qqn. ~ bout</B> a scoate din sărite pe cineva; <B>fils ~ papa</B> fecior de bani gata; <B>au secours!</B> ajutor! <B>la rédaction de ce projet nous prendra deux ~ trois jours</B> redactarea acestui proiect ne va lua două-trei zile; <B>il consent ~ témoigner</B> consimte să depună mărturie.",
-                "<B>abaca</B> <I>s.m. </I>fibră textilă extrasă din frunzele unui bananier.",
-                "<B>abacule</B> <I>s.m. </I>mic cub dintr-un mozaic.",
-                "<B>abaissable</B> <I>adj. </I><BR><BR> <B>1.</B> care poate fi coborât; care poate fi micșorat, scăzut.<BR><BR> <B>2.</B> <I>(fig.) </I>care poate fi umilit.",
-                "<B>abaissant, ~e</B> <I>adj. </I>înjositor, degradant, umilitor, jignitor, ofensator, dezonorant.",
-                "<B>abaisse</B> <I>s.f. (culinar) </I>foaie subțire de aluat."
-            ]
-        }
-
         const definitions = new Map(); // { normalizedTerm : {term, mute, [definitions]}, etc. }
+
         let terms = [];
         const history = [];
 
@@ -358,11 +32,12 @@
         let selectedSuggestionIndex = -1;
         let shouldLookInside = false;
 
-        readDictionaryData();
-        readCorrectedDictionaryData();
-
-        terms = [...definitions.keys()].sort();
-        console.log(`Loaded ${definitions.size} definitions`);
+        readDictionaryData()
+            .then(_ => readCorrectedDictionaryData())
+            .then(_ => {
+                terms = [...definitions.keys()].sort();
+                console.log(`Loaded ${definitions.size} definitions`);
+            });
 
         document.addEventListener("DOMContentLoaded", function () {
             searchInput = document.getElementById("searchInput");
@@ -406,32 +81,36 @@
             return def.replaceAll("~", `<U>${subterm.replace("*", "")}</U>`);
         }
 
-        function readDictionaryData() {
-            [
-                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-                "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-            ]
-                .flatMap(letter => fr_dict[letter])
-                .forEach((entry) => {
-                    if (entry !== undefined && entry.startsWith("<B>")) {
-                        const term = entry.substring(3, entry.indexOf("</B>"));
-                        const isMute = term.startsWith("*");
+        async function readDictionaryData() {
+            return window.fetch("data.json")
+                .then(response => response.json())
+                .then(data => {
+                    [
+                        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+                    ]
+                        .flatMap(letter => data[letter])
+                        .forEach((entry) => {
+                            if (entry !== undefined && entry.startsWith("<B>")) {
+                                const term = entry.substring(3, entry.indexOf("</B>"));
+                                const isMute = term.startsWith("*");
 
-                        const normalizedTerm = normalizeForSearch(term)
-                            .replace("*", "");
-                        let termData = definitions.get(normalizedTerm);
-                        if (termData === undefined) {
-                            termData = {term: term.replace("*", ""), mute: isMute, defs: []};
-                            definitions.set(normalizedTerm, termData);
-                        }
+                                const normalizedTerm = normalizeForSearch(term)
+                                    .replace("*", "");
+                                let termData = definitions.get(normalizedTerm);
+                                if (termData === undefined) {
+                                    termData = {term: term.replace("*", ""), mute: isMute, defs: []};
+                                    definitions.set(normalizedTerm, termData);
+                                }
 
-                        termData.defs.push(entry);
-                    }
+                                termData.defs.push(entry);
+                            }
+                        });
                 });
         }
 
-        function readCorrectedDictionaryData() {
-            window.fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQLq5WSntmnMpg4_kpAXlP5z-knal1u_aYpcqCk-6SxbHnx8fw6ddWwsES7D2cwSCTpj1TrrerCsU8j/pub?gid=25454357&single=true&output=tsv")
+        async function readCorrectedDictionaryData() {
+            return window.fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQLq5WSntmnMpg4_kpAXlP5z-knal1u_aYpcqCk-6SxbHnx8fw6ddWwsES7D2cwSCTpj1TrrerCsU8j/pub?gid=25454357&single=true&output=tsv")
                 .then(response => response.text())
                 .then(text => {
                     console.log("Reading corrected dictionary data...");
@@ -587,7 +266,7 @@
                 suggestions.forEach((termData) => {
                     const li = document.createElement("li");
                     li.title = termData.term;
-                    const entry = termData.defs.join("\n").replaceAll("<BR>", "");
+                    const entry = termData.defs.join("\n").replaceAll("<BR>", " ");
                     li.innerHTML = entry.length > 100 ? entry.substring(0, 100) + "..." : entry;
                     li.addEventListener("click", () => {
                         searchInput.value = termData.term;

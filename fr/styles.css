@@ -1,0 +1,317 @@
+:root {
+    --color-background-primary: #FFF;
+    --color-background-search: #F4F4F4;
+    --color-background-history: #F8F8F8;
+    --color-background-result-hover: #F8F8F8;
+    --color-background-selection: dodgerblue;
+    --color-background-hover: rgba(30, 144, 255, 0.35);
+    --color-background-highlight: rgba(255, 187, 0, 0.5);
+
+    --color-text-primary: #111;
+    --color-text-secondary: rgba(0, 0, 0, 0.50);
+    --color-text-selection: white;
+    --color-text-bold: #0f5499;
+
+    --color-separator: #DDD;
+
+    --color-button-background: rgba(0, 0, 0, 0.05);
+    --color-button-background-hover: rgba(0, 0, 0, 0.15);
+    --color-button-background-active: rgba(0, 0, 0, 0.3);
+    --color-button-background-selected: dodgerblue;
+    --color-button-background-selected-hover: #0085ff;
+
+    --color-input-background: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-background-primary: #1E1E1E;
+        --color-background-search: #2D2D2D;
+        --color-background-history: #252525;
+        --color-background-result-hover: #222;
+        --color-background-selection: #0078D4;
+        --color-background-hover: rgba(0, 120, 212, 0.35);
+        --color-background-highlight: rgba(255, 187, 0, 0.3);
+
+        --color-text-primary: #E8E8E8;
+        --color-text-secondary: rgba(255, 255, 255, 0.50);
+        --color-text-selection: white;
+        --color-text-bold: #99c7ff;
+
+        --color-separator: #3D3D3D;
+
+        --color-button-background: rgba(255, 255, 255, 0.08);
+        --color-button-background-hover: rgba(255, 255, 255, 0.15);
+        --color-button-background-active: rgba(255, 255, 255, 0.25);
+        --color-button-background-selected: dodgerblue;
+        --color-button-background-selected-hover: #1084D8;
+
+        --color-input-background: #222;
+    }
+}
+
+body {
+    font-family: "Arial", serif;
+    line-height: 1.5rem;
+
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+
+    margin: 0;
+    height: 100vh;
+
+    color: var(--color-text-primary);
+    background-color: var(--color-background-primary);
+}
+
+.separator {
+    width: 1px;
+    height: 24px;
+    background-color: var(--color-separator);
+}
+
+[popover] {
+    margin: 0;
+    padding: 0.25rem;
+    border: 1px solid var(--color-background-selection);
+    background-color: var(--color-background-primary);
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+}
+
+#search {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: stretch;
+}
+
+#searchHeader {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+
+    padding: 1rem;
+    background-color: var(--color-background-search);
+    border-bottom: 1px solid var(--color-separator);
+}
+
+#searchBox {
+    display: flex;
+    align-items: center;
+    width: 400px;
+    position: relative;
+}
+
+#searchInput {
+    color: var(--color-text-primary);
+    background-color: var(--color-input-background);
+    border: 1px solid var(--color-separator);
+    border-radius: 0.5rem;
+
+    flex-grow: 1;
+    width: 100%;
+
+    padding: 0.5rem;
+    margin: 0;
+
+    font-size: x-large;
+    font-weight: bold;
+
+    anchor-name: --anchor_suggestions;
+}
+
+#lookInsideButton {
+    position: absolute;
+    right: 0.5rem;
+}
+
+#resultList {
+    overflow-y: auto;
+    list-style-type: none;
+    margin: 0;
+    padding: 0 0 1rem;
+}
+
+#resultList li {
+    position: relative;
+    padding: 1rem 1rem 1rem 3rem;
+    text-indent: -2rem;
+    border-bottom: 1px dotted var(--color-separator);
+}
+
+#resultList li b {
+    color: var(--color-text-bold);
+}
+
+#sourcePopover {
+    background-color: var(--color-background-selection);
+    padding: 1rem;
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+}
+
+#sourceLabel {
+    font-family: monospace;
+    font-weight: bold;
+
+    color: var(--color-text-selection);
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+}
+
+#resultList li:hover {
+    background-color: var(--color-background-result-hover);
+}
+
+.term {
+    font-size: large;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-right: 0.5rem;
+    color: var(--color-text-bold);
+}
+
+.mute {
+    opacity: 0.35;
+}
+
+.controlList {
+    flex-direction: row !important;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.controlList li {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem !important;
+}
+
+#history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    min-width: 150px;
+    max-width: 150px;
+    padding: 0.5rem;
+    background-color: var(--color-background-history);
+    border-left: 1px solid var(--color-separator);
+}
+
+#historyHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline-start: 0.5rem;
+    padding-block-start: 0.5rem;
+}
+
+#historyList {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+#suggestionsPopover {
+    position-anchor: --anchor_suggestions;
+    top: anchor(--anchor_suggestions bottom);
+    left: anchor(--anchor_suggestions left);
+}
+
+#suggestionsList .term {
+    text-decoration: none;
+    font-size: large;
+}
+
+.itemList {
+    display: flex;
+    flex-direction: column;
+
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.itemList li {
+    margin: 0;
+    padding: 0.25rem 2rem 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    color: var(--color-text-primary);
+}
+
+.itemList li:hover {
+    background-color: var(--color-background-hover);
+    cursor: pointer;
+}
+
+.itemList li.selected {
+    background-color: var(--color-background-selection);
+    color: var(--color-text-selection);
+}
+
+.iconButton {
+    cursor: pointer;
+    color: var(--color-text-primary);
+    background-color: var(--color-button-background);
+    border: none;
+    border-radius: 0.25rem;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    padding: 0;
+}
+
+.iconButton:hover {
+    background-color: var(--color-button-background-hover);
+}
+
+.iconButton:active {
+    background-color: var(--color-button-background-active);
+}
+
+.iconButton.selected {
+    background-color: var(--color-background-selection);
+    color: var(--color-text-selection);
+}
+
+.iconButton:hover.selected {
+    background-color: var(--color-button-background-selected-hover);
+    color: var(--color-text-selection);
+}
+
+::highlight(search-results) {
+    background-color: var(--color-background-highlight);
+}
+
+::selection {
+    color: var(--color-text-selection);
+    background-color: var(--color-background-selection);
+}
+
+#info {
+    padding: 0.25rem;
+    margin: 0;
+
+    font-size: x-small;
+    text-box-trim: trim-both;
+    user-select: none;
+
+    border-radius: 0.25rem;
+    color: var(--color-text-secondary);
+}
+
+#info:hover {
+    color: var(--color-text-selection);
+    background: var(--color-background-selection);
+}
