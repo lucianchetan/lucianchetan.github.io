@@ -6,7 +6,7 @@
     <meta charset="UTF-8"/>
 
     <link rel="icon" type="image/png" href="fr/favicon.png">
-    <link rel="stylesheet" type="text/css" href="fr/styles.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 
     <script lang="text/javascript" defer>
         const definitions = new Map(); // { normalizedTerm : {term, mute, [definitions]}, etc. }
@@ -82,7 +82,7 @@
         }
 
         async function readDictionaryData() {
-            return window.fetch("fr/data.json")
+            return window.fetch("data.json")
                 .then(response => response.json())
                 .then(data => {
                     [
