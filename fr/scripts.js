@@ -41,7 +41,7 @@ class Data {
             } else if (shouldLookInside) {
                 for (let i = 0; i < termEntry.defs.length; i++) {
                     let def = termEntry.defs[i];
-                    let normalizedDef = this._normalizeForSearch(def);
+                    let normalizedDef = Data.normalizeForSearch(def);
                     let textOnlyDef = normalizedDef.replace(/<[^>]*>/g, "");
                     if (textOnlyDef.includes(query)) {
                         found = true;
@@ -72,7 +72,7 @@ class Data {
                             const term = def.substring(3, def.indexOf("</B>"));
                             const isMute = term.startsWith("*");
 
-                            const normalizedTerm = this._normalizeForSearch(term).replace("*", "");
+                            const normalizedTerm = Data.normalizeForSearch(term).replace("*", "");
                             const originalTerm = term.replace("*", "");
                             let termEntry = this.definitions.get(normalizedTerm);
                             if (termEntry === undefined) {
@@ -118,7 +118,7 @@ class Data {
         return def.replaceAll("~", `<U>${subterm.replace("*", "")}</U>`);
     }
 
-    _normalizeForSearch = (input) => {
+    static normalizeForSearch = (input) => {
         return input
             .toLowerCase()
             .replaceAll('æ', 'ae')
@@ -130,7 +130,7 @@ class Data {
             .replaceAll("'", "");
     }
 
-    _normalizeForHighlighting = (input) => {
+    static normalizeForHighlighting = (input) => {
         return input
             .toLowerCase()
             .replaceAll('ae', 'æ')
@@ -142,9 +142,8 @@ class Data {
 
 class UI {
     searchInput;
-    lookInsideButton;
+    lookInsideToggleButton;
     resultList;
-    historyList;
     suggestionsPopover;
     suggestionsList;
     controlPopover;
@@ -155,6 +154,7 @@ class UI {
     reportButton;
     sourcePopover;
     sourceLabel;
+    historyList;
     clearHistoryButton;
 
     constructor(state) {
@@ -163,24 +163,22 @@ class UI {
 
     initialize = () => {
         this.searchInput = document.getElementById("searchInput");
-        this.lookInsideButton = document.getElementById("lookInsideButton");
+        this.lookInsideToggleButton = document.getElementById("lookInsideButton");
         this.resultList = document.getElementById("resultList");
-        this.historyList = document.getElementById("historyList");
-
         this.suggestionsPopover = document.getElementById("suggestionsPopover");
         this.suggestionsList = document.getElementById("suggestionsList");
-
         this.controlPopover = document.getElementById("controlPopover");
         this.littreButton = document.getElementById("littreButton");
         this.cnrtlButton = document.getElementById("cnrtlButton");
         this.wiktionaryButton = document.getElementById("wiktionaryButton");
         this.sourceButton = document.getElementById("sourceButton");
         this.reportButton = document.getElementById("reportButton");
-
         this.sourcePopover = document.getElementById("sourcePopover");
         this.sourceLabel = document.getElementById("sourceLabel");
-
+        this.historyList = document.getElementById("historyList");
         this.clearHistoryButton = document.getElementById("clearHistoryButton");
+
+        //
 
         this.searchInput.addEventListener("keyup", this._processSearchInput);
         this.searchInput.addEventListener("mouseenter", () => {
@@ -192,17 +190,15 @@ class UI {
             }
         });
 
-        this.lookInsideButton.addEventListener("click", this._processLookInsideToggleButton);
-
+        this.lookInsideToggleButton.addEventListener("click", this._processLookInsideToggleButton);
         this.clearHistoryButton.addEventListener("click", this.state.clearHistory);
 
-        //
-
+        // state handlers
         this.state.onUpdatedSearchQuery = (searchQuery) => {
             this.searchInput.value = searchQuery;
         }
         this.state.onUpdatedLookInside = (lookInside) => {
-            this.lookInsideButton.classList.toggle("selected", lookInside);
+            this.lookInsideToggleButton.classList.toggle("selected", lookInside);
         }
         this.state.onUpdatedSuggestions = (suggestedTermEntries) => {
             if (suggestedTermEntries.length === 0) {
@@ -213,9 +209,10 @@ class UI {
 
             this.suggestionsList.textContent = "";
             suggestedTermEntries.forEach((termEntry) => {
+                const content = termEntry.defs.join("\n").replaceAll("<BR>", " ");
+
                 const li = document.createElement("li");
                 li.title = termEntry.normalizedTerms;
-                const content = termEntry.defs.join("\n").replaceAll("<BR>", " ");
                 li.innerHTML = content.length > 100 ? content.substring(0, 100) + "..." : content;
                 li.onclick = () => {
                     this.state.updateSearchQuery(termEntry.originalTerm);
@@ -246,11 +243,12 @@ class UI {
                     const li = document.createElement("li");
                     li.innerHTML = this.state.data._processDef(originalTerm, def);
 
-                    const termAnchorName = "--anchor_term_" + count;
+                    const termAnchorName = `--anchor_term_${count}`;
                     const termEl = document.createElement("span");
                     termEl.className = "term";
                     termEl.style.anchorName = termAnchorName;
                     termEl.textContent = originalTerm;
+                    ``
 
                     termEl.onclick = () => {
                         this.sourceButton.onclick = () => {
@@ -266,20 +264,20 @@ class UI {
                         const searchTerm = commaIndex > -1 ? originalTerm.substring(0, originalTerm.indexOf(",")) : originalTerm;
                         this.littreButton.onclick = () => {
                             this._hidePopover(this.controlPopover);
-                            this._openLink("https://www.littre.org/definition/" + searchTerm);
+                            this._openLink(`https://www.littre.org/definition/${searchTerm}`);
                         }
                         this.cnrtlButton.onclick = () => {
                             this._hidePopover(this.controlPopover);
-                            this._openLink("https://www.cnrtl.fr/definition/" + searchTerm);
+                            this._openLink(`https://www.cnrtl.fr/definition/${searchTerm}`);
                         }
                         this.wiktionaryButton.onclick = () => {
                             this._hidePopover(this.controlPopover);
-                            this._openLink("https://fr.wiktionary.org/wiki/" + searchTerm);
+                            this._openLink(`https://fr.wiktionary.org/wiki/${searchTerm}`);
                         }
 
                         this.controlPopover.style.positionAnchor = termAnchorName;
-                        this.controlPopover.style.top = "anchor(" + termAnchorName + " bottom)";
-                        this.controlPopover.style.left = "anchor(" + termAnchorName + " left)";
+                        this.controlPopover.style.top = `anchor(${termAnchorName} bottom)`;
+                        this.controlPopover.style.left = `anchor(${termAnchorName} left)`;
                         this._showPopover(this.controlPopover);
                     }
                     li.prepend(termEl);
@@ -321,17 +319,17 @@ class UI {
     _processSearchInput = (event) => {
         const key = event.key;
         if (key === "Enter") {
+            this.state.updateSearchQuery(this.searchInput.value.trim());
             this.state.performSearch();
             this.state.updateHistory();
         } else if (key === "ArrowUp") {
             this.state.selectPreviousSuggestion();
         } else if (key === "ArrowDown") {
             this.state.selectNextSuggestion();
-        } else if (key === "Enter") {
+        } else if (key === "Escape") {
             this.state.clearSuggestionSelection();
         } else if (!IGNORED_KEYS.has(key)) {
-            this.state.updateSearchQuery(this.searchInput.value.trim());
-            this.state.updateSuggestions();
+            this.state.updateSuggestions(this.searchInput.value.trim());
         }
     }
 
@@ -358,10 +356,10 @@ class UI {
                 currentNode = treeWalker.nextNode();
             }
 
-            const normalizedQuery = this.state.data._normalizeForHighlighting(query);
+            const normalizedQuery = Data.normalizeForHighlighting(query);
 
             textNodes.forEach((node) => {
-                const text = this.state.data._normalizeForHighlighting(node.textContent);
+                const text = Data.normalizeForHighlighting(node.textContent);
                 let startPos = 0;
                 while (startPos < text.length) {
                     const index = text.indexOf(normalizedQuery, startPos);
@@ -421,12 +419,11 @@ class State {
     data;
 
     _searchQuery = "";
+    _shouldLookInside = false;
     _searchResults = [];
 
-    _selectedSuggestionIndex = -1;
     _suggestions = [];
-
-    _shouldLookInside = false;
+    _selectedSuggestionIndex = -1;
 
     _searchQueryHistory = [];
 
@@ -479,9 +476,9 @@ class State {
 
         const searchResults = [];
         if (this._searchQuery.length >= 1) {
-            const normalizedSearchQuery = this.data._normalizeForSearch(this._searchQuery);
+            const normalizedSearchQuery = Data.normalizeForSearch(this._searchQuery);
             searchResults.push(...this.data.generateSearchResults(normalizedSearchQuery, this._shouldLookInside));
-            console.log("Found " + searchResults.length + " results for query '" + this._searchQuery + "'");
+            console.log(`Found ${searchResults.length} results for '${this._searchQuery}'`);
         }
         this._searchResults = searchResults;
 
@@ -517,11 +514,11 @@ class State {
             this.onUpdatedSelectedSuggestionIndex(this._selectedSuggestionIndex);
         }
     }
-    updateSuggestions = () => {
+    updateSuggestions = (searchQuery) => {
         const suggestions = [];
 
-        if (this._searchQuery.length > 0) {
-            const normalizedSearchQuery = this.data._normalizeForSearch(this._searchQuery);
+        if (searchQuery.length > 0) {
+            const normalizedSearchQuery = Data.normalizeForSearch(searchQuery);
             for (let i = 0; i < this.data.normalizedTerms.length; i++) {
                 const normalizedTerm = this.data.normalizedTerms[i];
                 if (normalizedTerm.startsWith(normalizedSearchQuery)) {

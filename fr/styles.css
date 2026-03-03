@@ -87,6 +87,8 @@ body {
 }
 
 #searchHeader {
+    position: relative;
+
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -206,7 +208,7 @@ body {
     max-width: 150px;
     padding: 0.5rem;
     background-color: var(--color-background-history);
-    border-left: 1px solid var(--color-separator);
+    border-right: 1px solid var(--color-separator);
 }
 
 #historyHeader {
@@ -300,6 +302,9 @@ body {
 }
 
 #info {
+    position: absolute;
+    right: 1rem;
+
     padding: 0.25rem;
     margin: 0;
 
@@ -307,11 +312,5 @@ body {
     text-box-trim: trim-both;
     user-select: none;
 
-    border-radius: 0.25rem;
     color: var(--color-text-secondary);
-}
-
-#info:hover {
-    color: var(--color-text-selection);
-    background: var(--color-background-selection);
 }

@@ -10,428 +10,40 @@
     <script type="text/javascript" src="scripts.js"></script>
 
     <script lang="text/javascript" defer>
-        const definitions = new Map(); // { normalizedTerm : {term, mute, [definitions]}, etc. }
+        const data = new Data();
+        const state = new State(data);
+        const ui = new UI(state);
 
-        let terms = [];
-        const history = [];
-
-        let searchInput;
-        let lookInsideButton;
-        let resultList;
-        let historyList;
-
-        let suggestionsPopover;
-        let suggestionsList;
-
-        let controlPopover;
-        let littreButton, cnrtlButton, wiktionaryButton, sourceButton, reportButton;
-
-        let sourcePopover;
-        let sourceLabel;
-
-        let currentQuery = "";
-        let selectedSuggestionIndex = -1;
-        let shouldLookInside = false;
-
-        readDictionaryData()
-            .then(_ => readCorrectedDictionaryData())
-            .then(_ => {
-                terms = [...definitions.keys()].sort();
-                console.log(`Loaded ${definitions.size} definitions`);
-            });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            searchInput = document.getElementById("searchInput");
-            lookInsideButton = document.getElementById("lookInsideButton");
-            resultList = document.getElementById("resultList");
-            historyList = document.getElementById("historyList");
-
-            suggestionsPopover = document.getElementById("suggestionsPopover");
-            suggestionsList = document.getElementById("suggestionsList");
-
-            controlPopover = document.getElementById("controlPopover");
-            littreButton = document.getElementById("littreButton");
-            cnrtlButton = document.getElementById("cnrtlButton");
-            wiktionaryButton = document.getElementById("wiktionaryButton");
-            sourceButton = document.getElementById("sourceButton");
-            reportButton = document.getElementById("reportButton");
-
-            sourcePopover = document.getElementById("sourcePopover");
-            sourceLabel = document.getElementById("sourceLabel");
-
-            searchInput.addEventListener("keyup", processInputChange);
-            searchInput.addEventListener("mouseenter", () => {
-                searchInput.focus();
-                searchInput.select();
-            });
-
-            document.addEventListener("visibilitychange", () => {
-                if (!document.hidden) {
-                    searchInput.focus();
-                    searchInput.select();
-                }
-            });
+        document.addEventListener("DOMContentLoaded", async function () {
+            await data.initialize();
+            ui.initialize();
         });
-
-        ///
-
-        async function readDictionaryData() {
-            return window.fetch("data.json")
-                .then(response => response.json())
-                .then(data => {
-                    [
-                        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-                        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-                    ]
-                        .flatMap(letter => data[letter])
-                        .forEach((entry) => {
-                            if (entry !== undefined && entry.startsWith("<B>")) {
-                                const term = entry.substring(3, entry.indexOf("</B>"));
-                                const isMute = term.startsWith("*");
-
-                                const normalizedTerm = normalizeForSearch(term)
-                                    .replace("*", "");
-                                let termData = definitions.get(normalizedTerm);
-                                if (termData === undefined) {
-                                    termData = {term: term.replace("*", ""), mute: isMute, defs: []};
-                                    definitions.set(normalizedTerm, termData);
-                                }
-
-                                termData.defs.push(entry);
-                            }
-                        });
-                });
-        }
-
-        async function readCorrectedDictionaryData() {
-            return window.fetch(CORRECTED_DEFINITIONS_URL)
-                .then(response => response.text())
-                .then(text => {
-                    console.log("Reading corrected dictionary data...");
-                    const lines = text.split("\r\n");
-                    lines.forEach(line => {
-                        const parts = line.split("\t");
-                        if (parts.length >= 4) {
-                            try {
-                                const term = parts[1];
-                                const index = parts[2];
-                                const def = parts[3];
-                                const termData = definitions.get(term);
-                                if (termData !== undefined && def !== undefined && def.length > 0) {
-                                    termData.defs[index] = def;
-                                    console.log("Stored correction:", parts);
-                                }
-                            } catch (e) {
-                                console.error("Error reading corrected dictionary data:", e);
-                            }
-                        }
-                    });
-                });
-        }
-
-        function processInputChange(event) {
-            const key = event.key;
-            if (key === "Enter") {
-                if (selectedSuggestionIndex >= 0 && suggestionsList && suggestionsList.children.length > 0) {
-                    const li = suggestionsList.children[selectedSuggestionIndex];
-                    if (li) {
-                        searchInput.value = li.title;
-                    }
-                }
-                search(true);
-            } else if (key === "ArrowUp") {
-                selectedSuggestionIndex--;
-                if (selectedSuggestionIndex < 0) {
-                    selectedSuggestionIndex = 0;
-                }
-                updateSuggestionSelection();
-            } else if (key === "ArrowDown") {
-                selectedSuggestionIndex++;
-                if (selectedSuggestionIndex >= suggestionsList.children.length) {
-                    selectedSuggestionIndex = suggestionsList.children.length - 1;
-                }
-                updateSuggestionSelection();
-            } else if (key === "Escape") {
-                hideSuggestionsPopover();
-            } else if (!IGNORED_KEYS.has(key)) {
-                suggest();
-            }
-        }
-
-        function toggleLookInside() {
-            shouldLookInside = !shouldLookInside;
-            if (shouldLookInside) {
-                lookInsideButton.classList.add("selected");
-            } else {
-                lookInsideButton.classList.remove("selected");
-            }
-            search(false);
-        }
-
-        function search(shouldUpdateHistory) {
-            searchInput.select();
-
-            hideSuggestionsPopover();
-            cleanupResults();
-            cleanupHighlights();
-
-            ///
-
-            const query = searchInput.value.trim();
-            if (query.length >= 1) {
-                if (shouldUpdateHistory) {
-                    addToHistory(query);
-                }
-
-                const resultCount = generateResults(
-                    normalizeForSearch(query),
-                    shouldLookInside);
-                console.log("Found " + resultCount + " results for query '" + query + "'");
-
-                generateHighlights(query);
-            }
-        }
-
-        function hideSuggestionsPopover() {
-            hidePopover(suggestionsPopover);
-            currentQuery = "";
-            selectedSuggestionIndex = -1;
-        }
-
-        function suggest() {
-            const query = searchInput.value.trim();
-            if (query.length === 0) {
-                hideSuggestionsPopover();
-            } else if (query !== currentQuery && query.length >= 1) {
-                currentQuery = normalizeForSearch(query);
-                const suggestions = [];
-                for (let i = 0; i < terms.length; i++) {
-                    if (terms[i].startsWith(query)) {
-                        let termData = definitions.get(terms[i]);
-                        suggestions.push(termData);
-                        if (suggestions.length >= 12) {
-                            break;
-                        }
-                    }
-                }
-
-                suggestionsList.textContent = "";
-                suggestions.forEach((termData) => {
-                    const li = document.createElement("li");
-                    li.title = termData.term;
-                    const entry = termData.defs.join("\n").replaceAll("<BR>", " ");
-                    li.innerHTML = entry.length > 100 ? entry.substring(0, 100) + "..." : entry;
-                    li.addEventListener("click", () => {
-                        searchInput.value = termData.term;
-                        search(true);
-                    })
-                    suggestionsList.appendChild(li);
-                });
-
-                if (suggestions.length > 0) {
-                    selectedSuggestionIndex = -1;
-                    updateSuggestionSelection();
-                    showPopover(suggestionsPopover);
-                } else {
-                    hideSuggestionsPopover();
-                }
-            }
-        }
-
-        function cleanupResults() {
-            resultList.scrollTo(0, 0);
-            resultList.textContent = "";
-        }
-
-        function generateResults(query, shouldLookInside) {
-            let count = 0;
-            let isOneLetterQuery = query.length === 1;
-            definitions.forEach((termData, normalizedTerm) => {
-                let found = false;
-                if (isOneLetterQuery) {
-                    found = normalizedTerm === query;
-
-                } else if (shouldLookInside) {
-                    for (let i = 0; i < termData.defs.length; i++) {
-                        let def = termData.defs[i];
-                        let normalizedDef = normalizeForSearch(def);
-                        let textOnlyDef = normalizedDef.replace(/<[^>]*>/g, "");
-                        if (textOnlyDef.includes(query)) {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                } else {
-                    found = normalizedTerm.startsWith(query);
-                }
-
-                if (found) {
-                    const term = termData.term;
-                    termData.defs.forEach((def, index) => {
-                        count++;
-                        const li = document.createElement("li");
-                        li.innerHTML = processDef(term, def);
-
-                        const termAnchorName = "--anchor_term_" + count;
-                        const termEl = document.createElement("span");
-                        termEl.className = "term";
-                        termEl.style.anchorName = termAnchorName;
-                        termEl.textContent = term;
-                        termEl.onclick = () => {
-                            sourceButton.onclick = () => {
-                                sourceLabel.textContent = def;
-                                showPopover(sourcePopover);
-                            }
-                            reportButton.onclick = () => {
-                                reportDefinition(normalizedTerm, index);
-                                hidePopover(controlPopover);
-                            };
-
-                            const commaIndex = term.indexOf(",");
-                            const searchTerm = commaIndex > -1 ? term.substring(0, term.indexOf(",")) : term;
-                            littreButton.onclick = () => {
-                                hidePopover(controlPopover);
-                                openLink("https://www.littre.org/definition/" + searchTerm);
-                            }
-                            cnrtlButton.onclick = () => {
-                                hidePopover(controlPopover);
-                                openLink("https://www.cnrtl.fr/definition/" + searchTerm);
-                            }
-                            wiktionaryButton.onclick = () => {
-                                hidePopover(controlPopover);
-                                openLink("https://fr.wiktionary.org/wiki/" + searchTerm);
-                            }
-
-                            controlPopover.style.positionAnchor = termAnchorName;
-                            controlPopover.style.top = "anchor(" + termAnchorName + " bottom)";
-                            controlPopover.style.left = "anchor(" + termAnchorName + " left)";
-                            showPopover(controlPopover);
-                        }
-                        li.prepend(termEl);
-
-                        if (termData.mute) {
-                            const muteEl = document.createElement("span");
-                            muteEl.className = "mute";
-                            muteEl.textContent = "*";
-                            li.prepend(muteEl);
-                        }
-
-                        resultList.appendChild(li);
-                    });
-                }
-            });
-            return count;
-        }
-
-        function openLink(url) {
-            window.open(url, "_blank")
-        }
-
-        function cleanupHighlights() {
-            if (CSS && CSS.highlights) {
-                CSS.highlights.clear();
-            }
-        }
-
-        function updateSuggestionSelection() {
-            if (!suggestionsList) {
-                return;
-            }
-            const children = suggestionsList.children;
-            for (let i = 0; i < children.length; i++) {
-                children[i].classList.toggle('selected', i === selectedSuggestionIndex);
-            }
-            // NOTE: the list is not very tall;
-            // ensure the selected item is visible
-            // const li = children[selectedSuggestionIndex];
-            // if (li && typeof li.scrollIntoView === 'function') {
-            //     li.scrollIntoView({block: 'nearest'});
-            // }
-        }
-
-        function generateHighlights(query) {
-            const ranges = [];
-            if (CSS && CSS.highlights && query.length >= 2) {
-                const treeWalker = document.createTreeWalker(resultList, NodeFilter.SHOW_TEXT);
-                const textNodes = [];
-                let currentNode = treeWalker.nextNode();
-                while (currentNode) {
-                    textNodes.push(currentNode);
-                    currentNode = treeWalker.nextNode();
-                }
-
-                const normalizedQuery = normalizeForHighlighting(query);
-
-                textNodes.forEach((node) => {
-                    const text = normalizeForHighlighting(node.textContent);
-                    let startPos = 0;
-                    while (startPos < text.length) {
-                        const index = text.indexOf(normalizedQuery, startPos);
-                        if (index === -1) {
-                            break;
-                        }
-                        const range = new Range();
-                        range.setStart(node, index);
-                        range.setEnd(node, index + normalizedQuery.length);
-                        if (!range.collapsed) {
-                            ranges.push(range);
-                        }
-                        startPos = index + normalizedQuery.length;
-                    }
-                });
-                const searchResultsHighlight = new Highlight(...ranges);
-                CSS.highlights.set("search-results", searchResultsHighlight);
-            }
-            return ranges.length;
-        }
-
-        function addToHistory(item) {
-            const itemIndex = history.indexOf(item);
-            if (itemIndex >= 0) {
-                history.splice(itemIndex, 1);
-                const itemToRemove = document.querySelector(`#historyList > li:nth-child(${itemIndex + 1})`);
-                historyList.removeChild(itemToRemove);
-            }
-
-            history.unshift(item);
-
-            const el = document.createElement("li");
-            el.value = item;
-            el.textContent = item;
-            el.onclick = () => loadSearchText(item);
-            historyList.prepend(el);
-            historyList.value = [item];
-        }
-
-        function clearHistory() {
-            history.splice(0, history.length);
-            historyList.textContent = "";
-        }
-
-        function loadSearchText(query) {
-            searchInput.value = query;
-            search(false);
-        }
-
-        function reportDefinition(term, index) {
-            const url = `https://docs.google.com/forms/d/e/1FAIpQLSfvDmSBcWPNiWHgPTWqXRikONgijGEXMPUtHloRQuVCZ8Q2wQ/` +
-                `formResponse?usp=pp_url` +
-                `&entry.1299933712=${window.encodeURIComponent(index)}` +
-                `&entry.1567861638=${window.encodeURIComponent(term)}` +
-                `&submit=Submit`
-            openLink(url);
-        }
     </script>
 </head>
 
 <body>
+<div id="history">
+    <div id="historyHeader">
+        <button id="clearHistoryButton" class="iconButton" title="Clear history">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.5703 18.2422" width="24" fill="currentColor">
+                <g>
+                    <rect height="18.2422" opacity="0" width="23.5703" x="0" y="0"/>
+                    <path d="M19.5072 8.26182C19.1915 8.19716 18.865 8.16406 18.5312 8.16406C18.4039 8.16406 18.2775 8.16891 18.1536 8.18343C17.7073 4.95358 14.94 2.47656 11.5859 2.47656C7.91406 2.47656 4.94531 5.44531 4.94531 9.11719C4.94531 12.7891 7.91406 15.7578 11.5859 15.7578C12.4276 15.7578 13.2324 15.6018 13.9698 15.3107C14.1573 15.7273 14.404 16.1113 14.698 16.4539C13.7419 16.861 12.69 17.0859 11.5859 17.0859C7.1875 17.0859 3.61719 13.5156 3.61719 9.11719C3.61719 4.71875 7.1875 1.14844 11.5859 1.14844C15.6952 1.14844 19.0817 4.26474 19.5072 8.26182Z"/>
+                    <path d="M12.125 4.14844L12.125 9.41406C12.125 9.72656 11.8828 9.96094 11.5781 9.96094L7.5 9.96094C7.1875 9.96094 6.95312 9.72656 6.95312 9.41406C6.95312 9.10938 7.1875 8.875 7.5 8.875L11.0391 8.875L11.0391 4.14844C11.0391 3.84375 11.2734 3.60938 11.5781 3.60938C11.8828 3.60938 12.125 3.84375 12.125 4.14844Z"/>
+                    <path d="M22.5 13.2031C22.5 15.375 20.6875 17.1719 18.5312 17.1719C16.3594 17.1719 14.5625 15.3906 14.5625 13.2031C14.5625 11.0312 16.3594 9.23438 18.5312 9.23438C20.7109 9.23438 22.5 11.0234 22.5 13.2031ZM19.6562 11.3516L18.5156 12.5L17.4531 11.4453C17.2656 11.2656 16.9688 11.2734 16.7812 11.4453C16.5938 11.625 16.6016 11.9297 16.7812 12.1172L17.8359 13.1797L16.6875 14.3281C16.4844 14.5312 16.5156 14.8359 16.7109 15.0234C16.9062 15.2188 17.2109 15.25 17.4141 15.0469L18.5625 13.9062L19.6172 14.9531C19.8125 15.1406 20.1016 15.1328 20.2891 14.9531C20.4766 14.7734 20.4688 14.4766 20.2891 14.2812L19.2344 13.2266L20.3828 12.0781C20.5859 11.875 20.5547 11.5703 20.3594 11.375C20.1641 11.1875 19.8594 11.1484 19.6562 11.3516Z"/>
+                </g>
+            </svg>
+        </button>
+    </div>
+    <ul id="historyList" class="itemList"></ul>
+</div>
 <div id="search">
     <div id="searchHeader">
         <div id="searchBox">
+            <label for="searchInput" style="display: none">Search</label>
             <input id="searchInput" type="text" autocomplete='off' spellcheck='false' autocorrect='off'
                    placeholder="Search"/>
-            <button id="lookInsideButton" class="iconButton" onclick="toggleLookInside()" title="Look inside">
+            <button id="lookInsideButton" class="iconButton" title="Look inside">
                 <svg viewBox="0 0 22.7109 18.3047" width="24" fill="currentColor">
                     <g>
                         <rect height="18.3047" opacity="0" width="22.7109" x="0" y="0"/>
@@ -442,13 +54,12 @@
                 </svg>
             </button>
         </div>
+        <p id="info" title="Version">V260303</p>
         <div id="suggestionsPopover" popover="auto">
             <ul id="suggestionsList" class="itemList"></ul>
         </div>
     </div>
-
     <ul id="resultList"></ul>
-
     <div id="controlPopover" popover="auto">
         <ul class="itemList controlList">
             <li id="littreButton">Littré</li>
@@ -468,27 +79,9 @@
             </li>
         </ul>
     </div>
-
     <div id="sourcePopover" popover="auto">
         <p id="sourceLabel" contenteditable="true"></p>
     </div>
-
-</div>
-<div id="history">
-    <div id="historyHeader">
-        <button id="clearHistoryButton" class="iconButton" onclick="clearHistory()" title="Clear history">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23.5703 18.2422" width="24" fill="currentColor">
-                <g>
-                    <rect height="18.2422" opacity="0" width="23.5703" x="0" y="0"/>
-                    <path d="M19.5072 8.26182C19.1915 8.19716 18.865 8.16406 18.5312 8.16406C18.4039 8.16406 18.2775 8.16891 18.1536 8.18343C17.7073 4.95358 14.94 2.47656 11.5859 2.47656C7.91406 2.47656 4.94531 5.44531 4.94531 9.11719C4.94531 12.7891 7.91406 15.7578 11.5859 15.7578C12.4276 15.7578 13.2324 15.6018 13.9698 15.3107C14.1573 15.7273 14.404 16.1113 14.698 16.4539C13.7419 16.861 12.69 17.0859 11.5859 17.0859C7.1875 17.0859 3.61719 13.5156 3.61719 9.11719C3.61719 4.71875 7.1875 1.14844 11.5859 1.14844C15.6952 1.14844 19.0817 4.26474 19.5072 8.26182Z"/>
-                    <path d="M12.125 4.14844L12.125 9.41406C12.125 9.72656 11.8828 9.96094 11.5781 9.96094L7.5 9.96094C7.1875 9.96094 6.95312 9.72656 6.95312 9.41406C6.95312 9.10938 7.1875 8.875 7.5 8.875L11.0391 8.875L11.0391 4.14844C11.0391 3.84375 11.2734 3.60938 11.5781 3.60938C11.8828 3.60938 12.125 3.84375 12.125 4.14844Z"/>
-                    <path d="M22.5 13.2031C22.5 15.375 20.6875 17.1719 18.5312 17.1719C16.3594 17.1719 14.5625 15.3906 14.5625 13.2031C14.5625 11.0312 16.3594 9.23438 18.5312 9.23438C20.7109 9.23438 22.5 11.0234 22.5 13.2031ZM19.6562 11.3516L18.5156 12.5L17.4531 11.4453C17.2656 11.2656 16.9688 11.2734 16.7812 11.4453C16.5938 11.625 16.6016 11.9297 16.7812 12.1172L17.8359 13.1797L16.6875 14.3281C16.4844 14.5312 16.5156 14.8359 16.7109 15.0234C16.9062 15.2188 17.2109 15.25 17.4141 15.0469L18.5625 13.9062L19.6172 14.9531C19.8125 15.1406 20.1016 15.1328 20.2891 14.9531C20.4766 14.7734 20.4688 14.4766 20.2891 14.2812L19.2344 13.2266L20.3828 12.0781C20.5859 11.875 20.5547 11.5703 20.3594 11.375C20.1641 11.1875 19.8594 11.1484 19.6562 11.3516Z"/>
-                </g>
-            </svg>
-        </button>
-        <p id="info" title="Version">V260301</p>
-    </div>
-    <ul id="historyList" class="itemList"></ul>
 </div>
 </body>
 
