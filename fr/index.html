@@ -5,8 +5,9 @@
     <title>FR-RO</title>
     <meta charset="UTF-8"/>
 
-    <link rel="icon" type="image/png" href="fr/favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <script type="text/javascript" src="scripts.js"></script>
 
     <script lang="text/javascript" defer>
         const definitions = new Map(); // { normalizedTerm : {term, mute, [definitions]}, etc. }
@@ -74,13 +75,6 @@
 
         ///
 
-        function processDef(term, entry) {
-            const def = entry.substring(entry.indexOf("</B>") + 4);
-            const commaIndex = term.indexOf(",");
-            const subterm = commaIndex > -1 ? term.substring(0, commaIndex) : term;
-            return def.replaceAll("~", `<U>${subterm.replace("*", "")}</U>`);
-        }
-
         async function readDictionaryData() {
             return window.fetch("data.json")
                 .then(response => response.json())
@@ -110,7 +104,7 @@
         }
 
         async function readCorrectedDictionaryData() {
-            return window.fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQLq5WSntmnMpg4_kpAXlP5z-knal1u_aYpcqCk-6SxbHnx8fw6ddWwsES7D2cwSCTpj1TrrerCsU8j/pub?gid=25454357&single=true&output=tsv")
+            return window.fetch(CORRECTED_DEFINITIONS_URL)
                 .then(response => response.text())
                 .then(text => {
                     console.log("Reading corrected dictionary data...");
@@ -134,8 +128,6 @@
                     });
                 });
         }
-
-        const IGNORED_KEYS = new Set(["Tab", "Shift", "Control", "Alt", "Meta", "CapsLock", "ArrowLeft", "ArrowRight"]);
 
         function processInputChange(event) {
             const key = event.key;
@@ -164,27 +156,6 @@
             } else if (!IGNORED_KEYS.has(key)) {
                 suggest();
             }
-        }
-
-        function normalizeForSearch(input) {
-            return input
-                .toLowerCase()
-                .replaceAll('æ', 'ae')
-                .replaceAll('œ', 'oe')
-                .replaceAll('ç', 'c')
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replaceAll(",", "")
-                .replaceAll("'", "");
-        }
-
-        function normalizeForHighlighting(input) {
-            return input
-                .toLowerCase()
-                .replaceAll('ae', 'æ')
-                .replaceAll('oe', 'œ')
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "");
         }
 
         function toggleLookInside() {
@@ -225,24 +196,6 @@
             hidePopover(suggestionsPopover);
             currentQuery = "";
             selectedSuggestionIndex = -1;
-        }
-
-        function showPopover(popover) {
-            if (!popover) {
-                return;
-            }
-            if (!popover.matches(":popover-open")) {
-                popover.showPopover();
-            }
-        }
-
-        function hidePopover(popover) {
-            if (!popover) {
-                return;
-            }
-            if (popover.matches(":popover-open")) {
-                popover.hidePopover();
-            }
         }
 
         function suggest() {
