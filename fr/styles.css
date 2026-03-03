@@ -12,6 +12,7 @@
     --color-text-selection: white;
     --color-text-bold: #0f5499;
 
+    --color-accent: dodgerblue;
     --color-separator: #DDD;
 
     --color-button-background: rgba(0, 0, 0, 0.05);
@@ -225,10 +226,19 @@ body {
     overflow-y: auto;
 }
 
+#historyList .restored {
+    color: var(--color-text-secondary) !important;
+}
+
 #suggestionsPopover {
     position-anchor: --anchor_suggestions;
     top: anchor(--anchor_suggestions bottom);
     left: anchor(--anchor_suggestions left);
+}
+
+#suggestionsList {
+    max-width: 600px;
+    overflow: clip;
 }
 
 #suggestionsList .term {
@@ -247,9 +257,13 @@ body {
 
 .itemList li {
     margin: 0;
-    padding: 0.25rem 2rem 0.25rem 0.5rem;
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
     border-radius: 0.25rem;
     color: var(--color-text-primary);
+
+    overflow: clip;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .itemList li:hover {
@@ -313,4 +327,14 @@ body {
     user-select: none;
 
     color: var(--color-text-secondary);
+}
+
+.iconLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.iconLabel svg {
+    fill: var(--color-accent);
 }

@@ -32,10 +32,10 @@ class Data {
 
     generateSearchResults = (query, shouldLookInside) => {
         const results = [];
-        const isOneLetterQuery = query.length === 1;
+        const isShortQuery = query.length <= 2;
         this.definitions.forEach((termEntry, normalizedTerm) => {
             let found = false;
-            if (isOneLetterQuery) {
+            if (isShortQuery) {
                 found = normalizedTerm === query;
 
             } else if (shouldLookInside) {
@@ -111,11 +111,14 @@ class Data {
             });
     }
 
-    _processDef = (term, entry) => {
-        const def = entry.substring(entry.indexOf("</B>") + 4);
-        const commaIndex = term.indexOf(",");
-        const subterm = commaIndex > -1 ? term.substring(0, commaIndex) : term;
-        return def.replaceAll("~", `<U>${subterm.replace("*", "")}</U>`);
+    _expandDef = (originalTerm, def) => {
+        const commaIndex = originalTerm.indexOf(",");
+        const subterm = (commaIndex > -1 ? originalTerm.substring(0, commaIndex) : originalTerm)
+            .replace("*", "");
+        const subdef = def.substring(def.indexOf("</B>") + 4);
+        return [
+            originalTerm.replaceAll("~", subterm),
+            subdef.replaceAll("~", `<U>${subterm}</U>`)];
     }
 
     static normalizeForSearch = (input) => {
@@ -209,11 +212,9 @@ class UI {
 
             this.suggestionsList.textContent = "";
             suggestedTermEntries.forEach((termEntry) => {
-                const content = termEntry.defs.join("\n").replaceAll("<BR>", " ");
-
                 const li = document.createElement("li");
-                li.title = termEntry.normalizedTerms;
-                li.innerHTML = content.length > 100 ? content.substring(0, 100) + "..." : content;
+                li.title = termEntry.originalTerm;
+                li.innerHTML = termEntry.defs.join("\n").replaceAll("<BR>", " ");
                 li.onclick = () => {
                     this.state.updateSearchQuery(termEntry.originalTerm);
                     this.state.performSearch();
@@ -241,15 +242,14 @@ class UI {
                 termEntry.defs.forEach((def, index) => {
                     count++;
                     const li = document.createElement("li");
-                    li.innerHTML = this.state.data._processDef(originalTerm, def);
+                    const expanded = this.state.data._expandDef(originalTerm, def);
+                    li.innerHTML = expanded[1];
 
                     const termAnchorName = `--anchor_term_${count}`;
                     const termEl = document.createElement("span");
                     termEl.className = "term";
                     termEl.style.anchorName = termAnchorName;
-                    termEl.textContent = originalTerm;
-                    ``
-
+                    termEl.textContent = expanded[0];
                     termEl.onclick = () => {
                         this.sourceButton.onclick = () => {
                             this.sourceLabel.textContent = def;
@@ -296,6 +296,19 @@ class UI {
             this._generateHighlights();
             this._selectSearchInputText();
         }
+        this.state.onRestoredHistory = (history) => {
+            history.forEach((query) => {
+                const li = document.createElement("li");
+                li.classList.add("restored");
+                li.textContent = query;
+                li.onclick = () => {
+                    li.classList.remove("restored");
+                    this.state.updateSearchQuery(query);
+                    this.state.performSearch();
+                }
+                this.historyList.append(li);
+            });
+        }
         this.state.onClearedHistory = () => {
             this.historyList.scrollTo(0, 0);
             this.historyList.textContent = "";
@@ -311,6 +324,7 @@ class UI {
         }
         this.state.onReusedHistory = (index) => {
             const li = this.historyList.children[index];
+            li.classList.remove("restored");
             this.historyList.removeChild(li);
             this.historyList.prepend(li);
         }
@@ -425,7 +439,7 @@ class State {
     _suggestions = [];
     _selectedSuggestionIndex = -1;
 
-    _searchQueryHistory = [];
+    _searchHistory = [];
 
     constructor(data) {
         this.data = data;
@@ -433,28 +447,22 @@ class State {
 
     // handlers
     onUpdatedSearchQuery = (value) => {
-        // TODO implement
     }
     onUpdatedLookInside = (lookInside) => {
-        //  TODO implement
-    };
+    }
     onUpdatedSuggestions = (suggestions) => {
-        //  TODO implement
     }
     onUpdatedSelectedSuggestionIndex = (index) => {
-        //  TODO implement
-    };
+    }
     onUpdatedSearchResults = (searchResults) => {
-        // TODO implement
+    }
+    onRestoredHistory = (history) => {
     }
     onClearedHistory = () => {
-        // TODO implement
     }
     onAddedHistory = (query) => {
-        // TODO implement
     }
     onReusedHistory = (index) => {
-        // TODO implement
     }
 
     // search
@@ -543,18 +551,32 @@ class State {
 
     // history
     clearHistory = () => {
-        this._searchQueryHistory = [];
-        this.onClearedHistory(this._searchQueryHistory);
+        this._searchHistory = [];
+        this.onClearedHistory(this._searchHistory);
+
+        this.writeHistoryToPersistence();
     }
     updateHistory = () => {
-        const existingIndex = this._searchQueryHistory.indexOf(this._searchQuery);
+        const existingIndex = this._searchHistory.indexOf(this._searchQuery);
         if (existingIndex > -1) {
-            this._searchQueryHistory.splice(existingIndex, 1);
-            this._searchQueryHistory.unshift(this._searchQuery);
+            this._searchHistory.splice(existingIndex, 1);
+            this._searchHistory.unshift(this._searchQuery);
             this.onReusedHistory(existingIndex);
         } else {
-            this._searchQueryHistory.unshift(this._searchQuery);
+            this._searchHistory.unshift(this._searchQuery);
             this.onAddedHistory(this._searchQuery);
+        }
+
+        this.writeHistoryToPersistence();
+    }
+    writeHistoryToPersistence = () => {
+        localStorage.setItem("searchHistory", JSON.stringify(this._searchHistory.slice(0, 100)));
+    }
+    readHistoryFromPersistence = () => {
+        const history = localStorage.getItem("searchHistory");
+        if (history) {
+            this._searchHistory = JSON.parse(history);
+            this.onRestoredHistory(this._searchHistory);
         }
     }
 }
