@@ -64,7 +64,7 @@ class Data {
     _readBaseDictionaryData = () => {
         ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
             .flatMap(letter => FR_DATA[letter])
-            .forEach((def) => {
+            .forEach((def, index) => {
                 if (def !== undefined && def.startsWith("<B>")) {
                     const term = def.substring(3, def.indexOf("</B>"));
                     const isMute = term.startsWith("*");
@@ -77,8 +77,122 @@ class Data {
                         this.definitions.set(normalizedTerm, termEntry);
                     }
                     termEntry.defs.push(def);
+                    // if (index < 300)
+                    {
+                        // this._checkTilda(originalTerm, def);
+                        // this._checkNumbering(originalTerm, def);
+                    }
                 }
             });
+    }
+
+    _checkNumbering = (term, def) => {
+        const simpleDef = def
+            .replaceAll("<BR>", "")
+            .replaceAll("<B>", "╠")
+            .replaceAll("</B>", "▐")
+            .replaceAll("<I>", "►")
+            .replaceAll("</I>", "◄");
+
+        let bStarts = [];
+        let bEnds = [];
+        let iStarts = [];
+        let iEnds = [];
+
+        for (let i = 0; i < simpleDef.length; i++) {
+            const c = simpleDef.charAt(i);
+            if (c === "╠") {
+                bStarts.push(i);
+            }
+            if (c === "▐") {
+                bEnds.push(i);
+            }
+            if (c === "►") {
+                iStarts.push(i);
+            }
+            if (c === "◄") {
+                iEnds.push(i);
+            }
+        }
+
+        if (bStarts.length === bEnds.length) {
+            for (let i = 0; i < bStarts.length - 1; i++) {
+                const start = bEnds[i];
+                const end = bStarts[i + 1];
+                const nonBoldText = simpleDef.substring(start, end);
+                if (nonBoldText === "II.") {
+                    console.log("Invalid definition ROMAN:", term, nonBoldText, start, end);
+                    return;
+                }
+            }
+        }
+    }
+
+    _checkTilda(term, def) {
+        const simpleDef = def
+            .replaceAll("<BR>", "")
+            .replaceAll("<B>", "╠")
+            .replaceAll("</B>", "▐")
+            .replaceAll("<I>", "►")
+            .replaceAll("</I>", "◄");
+
+        let bStarts = [];
+        let bEnds = [];
+        let iStarts = [];
+        let iEnds = [];
+
+        for (let i = 0; i < simpleDef.length; i++) {
+            const c = simpleDef.charAt(i);
+            if (c === "╠") {
+                bStarts.push(i);
+            }
+            if (c === "▐") {
+                bEnds.push(i);
+            }
+            if (c === "►") {
+                iStarts.push(i);
+            }
+            if (c === "◄") {
+                iEnds.push(i);
+            }
+        }
+
+        if (bStarts.length === bEnds.length) {
+            for (let i = 0; i < bStarts.length - 1; i++) {
+                const start = bEnds[i];
+                const end = bStarts[i + 1];
+                const nonBoldText = simpleDef.substring(start, end);
+                if (nonBoldText.indexOf("~") > -1) {
+                    console.log("Invalid definition TILDA:", term, nonBoldText, start, end);
+                    return;
+                }
+            }
+        }
+
+        if (bStarts.length === bEnds.length) {
+            for (let i = 0; i < bStarts.length; i++) {
+                const bStart = bStarts[i];
+                const bEnd = bEnds[i];
+                if (bStart >= bEnd) {
+                    console.error("Invalid definition BOLD:", term, simpleDef, bStart, bEnd, def.substring(bEnd, bStart));
+                    return;
+                }
+
+            }
+        } else {
+            console.error("Invalid definition:", def, simpleDef, bStarts, bEnds);
+        }
+
+        if (iStarts.length === iEnds.length) {
+            for (let i = 0; i < iStarts.length; i++) {
+                const iStart = iStarts[i];
+                const iEnd = iEnds[i];
+                if (iStart >= iEnd) {
+                    console.error("Invalid definition ITALIC:", def, simpleDef, iStart, iEnd, def.substring(iEnd, iStart));
+                    return;
+                }
+            }
+        }
     }
 
     _readTextData = async (url) => {
