@@ -20,8 +20,8 @@ class Data {
     normalizedTerms = []; // [ normalizedTerm ]
 
     initialize = async () => {
-        return this._readBaseDictionaryData()
-            .then(_ => this._readCorrectedDictionaryData())
+        this._readBaseDictionaryData();
+        return this._readCorrectedDictionaryData()
             .then(_ => {
                 this.normalizedTerms.push(...this.definitions.keys());
                 this.normalizedTerms.sort();
@@ -61,54 +61,59 @@ class Data {
 
     //
 
-    _readBaseDictionaryData = async () => {
-        return window.fetch("data.json")
-            .then(response => response.json())
-            .then(data => {
-                ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-                    .flatMap(letter => data[letter])
-                    .forEach((def) => {
-                        if (def !== undefined && def.startsWith("<B>")) {
-                            const term = def.substring(3, def.indexOf("</B>"));
-                            const isMute = term.startsWith("*");
+    _readBaseDictionaryData = () => {
+        ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+            .flatMap(letter => FR_DATA[letter])
+            .forEach((def) => {
+                if (def !== undefined && def.startsWith("<B>")) {
+                    const term = def.substring(3, def.indexOf("</B>"));
+                    const isMute = term.startsWith("*");
 
-                            const normalizedTerm = Data.normalizeForSearch(term).replace("*", "");
-                            const originalTerm = term.replace("*", "");
-                            let termEntry = this.definitions.get(normalizedTerm);
-                            if (termEntry === undefined) {
-                                termEntry = new TermEntry(normalizedTerm, originalTerm, isMute, []);
-                                this.definitions.set(normalizedTerm, termEntry);
-                            }
-                            termEntry.defs.push(def);
-                        }
-                    });
+                    const normalizedTerm = Data.normalizeForSearch(term).replace("*", "");
+                    const originalTerm = term.replace("*", "");
+                    let termEntry = this.definitions.get(normalizedTerm);
+                    if (termEntry === undefined) {
+                        termEntry = new TermEntry(normalizedTerm, originalTerm, isMute, []);
+                        this.definitions.set(normalizedTerm, termEntry);
+                    }
+                    termEntry.defs.push(def);
+                }
             });
     }
 
+    _readTextData = async (url) => {
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                return await response.text();
+            }
+        } catch (error) {
+            console.error("Could not read text data", error.message);
+        }
+        return "";
+    }
+
     _readCorrectedDictionaryData = async () => {
-        return window.fetch(CORRECTED_DEFINITIONS_URL)
-            .then(response => response.text())
-            .then(text => {
-                console.log("Reading corrected dictionary data...");
-                const lines = text.split("\r\n");
-                lines.forEach(line => {
-                    const parts = line.split("\t");
-                    if (parts.length >= 4) {
-                        try {
-                            const term = parts[1];
-                            const index = parts[2];
-                            const correctedDef = parts[3];
-                            const entry = this.definitions.get(term);
-                            if (entry !== undefined && correctedDef !== undefined && correctedDef.length > 0) {
-                                entry.defs[index] = correctedDef;
-                                console.log("Stored correction:", parts);
-                            }
-                        } catch (e) {
-                            console.error("Error reading corrected dictionary data:", e);
-                        }
+        console.log("Reading corrected dictionary data...");
+        const text = await this._readTextData(CORRECTED_DEFINITIONS_URL)
+        const lines = text.split("\r\n");
+        lines.forEach(line => {
+            const parts = line.split("\t");
+            if (parts.length >= 4) {
+                try {
+                    const term = parts[1];
+                    const index = parts[2];
+                    const correctedDef = parts[3];
+                    const entry = this.definitions.get(term);
+                    if (entry !== undefined && correctedDef !== undefined && correctedDef.length > 0) {
+                        entry.defs[index] = correctedDef;
+                        console.log("Stored correction:", parts);
                     }
-                });
-            });
+                } catch (e) {
+                    console.error("Error reading corrected dictionary data:", e);
+                }
+            }
+        });
     }
 
     _expandDef = (originalTerm, def) => {
@@ -259,7 +264,7 @@ class UI {
                             this._showPopover(this.sourcePopover);
                         }
                         this.reportButton.onclick = () => {
-                            this._reportDefinition(window.encodeURIComponent(normalizedTerm), window.encodeURIComponent(index));
+                            this._reportDefinition(encodeURIComponent(normalizedTerm), encodeURIComponent(index));
                             this._hidePopover(this.controlPopover);
                         };
 
@@ -434,7 +439,7 @@ class UI {
     }
 
     _openLink(url) {
-        window.open(url, "_blank")
+        open(url, "_blank")
     }
 
     _reportDefinition(term, index) {
