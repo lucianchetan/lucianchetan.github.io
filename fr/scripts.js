@@ -116,9 +116,7 @@ class Data {
         const subterm = (commaIndex > -1 ? originalTerm.substring(0, commaIndex) : originalTerm)
             .replace("*", "");
         const subdef = def.substring(def.indexOf("</B>") + 4);
-        return [
-            originalTerm.replaceAll("~", subterm),
-            subdef.replaceAll("~", `<U>${subterm}</U>`)];
+        return [originalTerm.replaceAll("~", subterm), subdef.replaceAll("~", `<U>${subterm}</U>`)];
     }
 
     static normalizeForSearch = (input) => {
@@ -159,6 +157,7 @@ class UI {
     sourceLabel;
     historyList;
     clearHistoryButton;
+    highlightsToggleButton;
 
     constructor(state) {
         this.state = state;
@@ -166,7 +165,7 @@ class UI {
 
     initialize = () => {
         this.searchInput = document.getElementById("searchInput");
-        this.lookInsideToggleButton = document.getElementById("lookInsideButton");
+        this.lookInsideToggleButton = document.getElementById("lookInsideToggleButton");
         this.resultList = document.getElementById("resultList");
         this.suggestionsPopover = document.getElementById("suggestionsPopover");
         this.suggestionsList = document.getElementById("suggestionsList");
@@ -180,6 +179,7 @@ class UI {
         this.sourceLabel = document.getElementById("sourceLabel");
         this.historyList = document.getElementById("historyList");
         this.clearHistoryButton = document.getElementById("clearHistoryButton");
+        this.highlightsToggleButton = document.getElementById("highlightsToggleButton");
 
         //
 
@@ -195,6 +195,7 @@ class UI {
 
         this.lookInsideToggleButton.addEventListener("click", this._processLookInsideToggleButton);
         this.clearHistoryButton.addEventListener("click", this.state.clearHistory);
+        this.highlightsToggleButton.addEventListener("click", this.state.toggleHighlights)
 
         // state handlers
         this.state.onUpdatedSearchQuery = (searchQuery) => {
@@ -230,7 +231,9 @@ class UI {
             }
         }
         this.state.onUpdatedSearchResults = (searchResults) => {
-            this._cleanupHighlights();
+            if (this.state._highlightsEnabled) {
+                this._cleanupHighlights();
+            }
 
             this.resultList.scrollTo(0, 0);
             this.resultList.textContent = "";
@@ -293,8 +296,11 @@ class UI {
                 });
             });
 
-            this._generateHighlights();
             this._selectSearchInputText();
+
+            if (this.state._highlightsEnabled) {
+                this._generateHighlights();
+            }
         }
         this.state.onRestoredHistory = (history) => {
             history.forEach((query) => {
@@ -327,6 +333,14 @@ class UI {
             li.classList.remove("restored");
             this.historyList.removeChild(li);
             this.historyList.prepend(li);
+        }
+        this.state.onUpdatedHighlights = (highlights) => {
+            this.highlightsToggleButton.classList.toggle("selected", highlights);
+            if (highlights) {
+                this._generateHighlights();
+            } else {
+                this._cleanupHighlights();
+            }
         }
     }
 
@@ -441,6 +455,8 @@ class State {
 
     _searchHistory = [];
 
+    _highlightsEnabled = false;
+
     constructor(data) {
         this.data = data;
     }
@@ -463,6 +479,8 @@ class State {
     onAddedHistory = (query) => {
     }
     onReusedHistory = (index) => {
+    }
+    onUpdatedHighlights = (highlights) => {
     }
 
     // search
@@ -547,6 +565,12 @@ class State {
         this.onUpdatedSelectedSuggestionIndex(this._selectedSuggestionIndex);
         this._suggestions = [];
         this.onUpdatedSuggestions(this._suggestions);
+    }
+
+    // highlights
+    toggleHighlights = () => {
+        this._highlightsEnabled = !this._highlightsEnabled;
+        this.onUpdatedHighlights(this._highlightsEnabled);
     }
 
     // history
