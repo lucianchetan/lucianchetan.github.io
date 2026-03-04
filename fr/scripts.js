@@ -135,6 +135,7 @@ class Data {
             .replaceAll("</B>", "▐")
             .replaceAll("<I>", "►")
             .replaceAll("</I>", "◄");
+        // console.log(simpleDef);
 
         let bStarts = [];
         let bEnds = [];
@@ -158,10 +159,10 @@ class Data {
         }
 
         if (bStarts.length === bEnds.length) {
-            for (let i = 0; i < bStarts.length - 1; i++) {
+            for (let i = 0; i < bStarts.length; i++) {
                 const start = bEnds[i];
-                const end = bStarts[i + 1];
-                const nonBoldText = simpleDef.substring(start, end);
+                const end = i < bStarts.length ? bStarts[i + 1] : def.length;
+                const nonBoldText = simpleDef.substring(start + 1, end);
                 if (nonBoldText.indexOf("~") > -1) {
                     console.log("Invalid definition TILDA:", term, nonBoldText, start, end);
                     return;
@@ -177,7 +178,6 @@ class Data {
                     console.error("Invalid definition BOLD:", term, simpleDef, bStart, bEnd, def.substring(bEnd, bStart));
                     return;
                 }
-
             }
         } else {
             console.error("Invalid definition:", def, simpleDef, bStarts, bEnds);
