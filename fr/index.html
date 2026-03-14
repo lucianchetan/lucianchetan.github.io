@@ -15,7 +15,7 @@
         const ui = new UI(state);
 
         document.addEventListener("DOMContentLoaded", async function () {
-            await data.initialize();
+            data.initialize();
             ui.initialize();
 
             state.readHistoryFromPersistence();

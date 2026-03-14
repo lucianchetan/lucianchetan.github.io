@@ -1,62 +1,57 @@
-const CORRECTED_DEFINITIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQLq5WSntmnMpg4_kpAXlP5z-knal1u_aYpcqCk-6SxbHnx8fw6ddWwsES7D2cwSCTpj1TrrerCsU8j/pub?gid=25454357&single=true&output=tsv";
 const IGNORED_KEYS = new Set(["Tab", "Shift", "Control", "Alt", "Meta", "CapsLock", "ArrowLeft", "ArrowRight"]);
 
-class DictionaryEntry {
-    definition;
+class Definition {
+    rawDefinition;
     isMute;
     term;
     normalizedTerm;
 
-    constructor(definition) {
-        this.definition = definition;
+    constructor(rawDefinition) {
+        this.rawDefinition = rawDefinition;
 
-        const _term = definition.substring(3, definition.indexOf("</B>"));
+        const _term = rawDefinition.substring(3, rawDefinition.indexOf("</B>"));
         this.isMute = _term.startsWith("*");
         this.term = _term.replace("*", "");
 
         this.normalizedTerm = Data.normalizeForSearch(this.term);
     }
+
+    expand = () => {
+        const commaIndex = this.term.indexOf(",");
+        const subterm = (commaIndex > -1 ? this.term.substring(0, commaIndex) : this.term)
+            .replace("*", "");
+        const subdef = this.rawDefinition.substring(this.rawDefinition.indexOf("</B>") + 4);
+        return [this.term.replaceAll("~", subterm), subdef.replaceAll("~", `<U>${subterm}</U>`)];
+    };
 }
 
 class Data {
-    definitions = new Map(); // { normalizedTerm : DictionaryEntry }
-    normalizedTerms = []; // [ normalizedTerm ]
+    definitions = []; // [ Definition ]
 
-    initialize = async () => {
-        this._readBaseDictionaryData();
-        return this._readCorrectedDictionaryData()
-            .then(_ => {
-                this.normalizedTerms.push(...this.definitions.keys());
-                this.normalizedTerms.sort();
-
-                console.log(`Loaded ${this.definitions.size} definitions`);
-            });
+    initialize = () => {
+        this._readDictionaryData();
+        console.log(`Loaded ${this.definitions.length} definitions`);
     }
 
     generateSearchResults = (query, shouldLookInside) => {
         const results = [];
         const isShortQuery = query.length <= 2;
-        this.definitions.forEach((terms, normalizedTerm) => {
+        this.definitions.forEach(definition => {
             let found = false;
             if (isShortQuery) {
-                found = normalizedTerm === query;
+                found = definition.normalizedTerm === query;
 
             } else if (shouldLookInside) {
-                for (let i = 0; i < terms.length; i++) {
-                    let term = terms[i];
-                    let normalizedDef = Data.normalizeForSearch(term.definition);
-                    let textOnlyDef = normalizedDef.replace(/<[^>]*>/g, "");
-                    if (textOnlyDef.includes(query)) {
-                        found = true;
-                        break;
-                    }
-                }
+                const normalizedDefinition = Data.normalizeForSearch(definition.definition);
+                const textOnlyDefinition = normalizedDefinition.replace(/<[^>]*>/g, "");
+                found = textOnlyDefinition.includes(query);
+
             } else {
-                found = normalizedTerm.startsWith(query);
+                found = definition.normalizedTerm.startsWith(query);
             }
 
             if (found) {
-                results.push(...terms);
+                results.push(definition);
             }
         });
         return results;
@@ -64,63 +59,21 @@ class Data {
 
     //
 
-    _readBaseDictionaryData = () => {
+    _readDictionaryData = () => {
         ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
             .flatMap(letter => FR_DATA[letter])
-            .forEach((rawDefinition, index) => {
+            .forEach((rawDefinition) => {
                 if (rawDefinition !== undefined && rawDefinition.startsWith("<B>")) {
-                    const dictionaryEntry = new DictionaryEntry(rawDefinition);
-                    const normalizedTerm = dictionaryEntry.normalizedTerm;
-                    let definitions = this.definitions.get(normalizedTerm);
-                    if (definitions === undefined) {
-                        definitions = [];
-                        this.definitions.set(normalizedTerm, definitions);
-                    }
-                    definitions.push(dictionaryEntry);
+                    this.definitions.push(new Definition(rawDefinition));
                 }
             });
     }
 
-    _readTextData = async (url) => {
-        try {
-            const response = await fetch(url);
-            if (response.ok) {
-                return await response.text();
-            }
-        } catch (error) {
-            console.error("Could not read text data", error.message);
-        }
-        return "";
-    }
-
-    _readCorrectedDictionaryData = async () => {
-        console.log("Reading corrected dictionary data...");
-        const text = await this._readTextData(CORRECTED_DEFINITIONS_URL)
-        const lines = text.split("\r\n");
-        lines.forEach(line => {
-            const parts = line.split("\t");
-            if (parts.length >= 4) {
-                try {
-                    const normalizedTerm = parts[1];
-                    const termIndex = parts[2];
-                    const correctedRawDefinition = parts[3];
-                    const definitions = this.definitions.get(normalizedTerm);
-                    if (definitions !== undefined && correctedRawDefinition !== undefined && correctedRawDefinition.length > 0) {
-                        definitions[termIndex] = new DictionaryEntry(correctedRawDefinition);
-                        console.log("Stored correction:", parts);
-                    }
-                } catch (e) {
-                    console.error("Error reading corrected dictionary data:", e);
-                }
-            }
-        });
-    }
-
-    _expandDef = (originalTerm, def) => {
+    _expandDefinition = (originalTerm, definition) => {
         const commaIndex = originalTerm.indexOf(",");
         const subterm = (commaIndex > -1 ? originalTerm.substring(0, commaIndex) : originalTerm)
             .replace("*", "");
-        const subdef = def.substring(def.indexOf("</B>") + 4);
+        const subdef = definition.substring(definition.indexOf("</B>") + 4);
         return [originalTerm.replaceAll("~", subterm), subdef.replaceAll("~", `<U>${subterm}</U>`)];
     }
 
@@ -217,12 +170,12 @@ class UI {
             }
 
             this.suggestionsList.textContent = "";
-            suggestedTermEntries.forEach((dictionaryEntry) => {
+            suggestedTermEntries.forEach((definition) => {
                 const li = document.createElement("li");
-                li.title = dictionaryEntry.term;
-                li.innerHTML = dictionaryEntry.definition.replaceAll("<BR>", " ");
+                li.title = definition.term;
+                li.innerHTML = definition.rawDefinition.replaceAll("<BR>", " ");
                 li.onclick = () => {
-                    this.state.updateSearchQuery(dictionaryEntry.term);
+                    this.state.updateSearchQuery(definition.term);
                     this.state.performSearch();
                     this.state.updateHistory();
                 };
@@ -244,20 +197,20 @@ class UI {
             this.resultList.textContent = "";
 
             let count = 0;
-            searchResults.forEach((dictionaryEntry) => {
+            searchResults.forEach((definition) => {
                 count++;
-                const normalizedTerm = dictionaryEntry.normalizedTerm;
-                const originalTerm = dictionaryEntry.term;
-                const rawDefinition = dictionaryEntry.definition;
+                const normalizedTerm = definition.normalizedTerm;
+                const originalTerm = definition.term;
+                const rawDefinition = definition.rawDefinition;
                 const li = document.createElement("li");
-                const expanded = this.state.data._expandDef(originalTerm, dictionaryEntry.definition);
-                li.innerHTML = expanded[1];
+                const expandedDefinition = definition.expand();
+                li.innerHTML = expandedDefinition[1];
 
                 const termAnchorName = `--anchor_term_${count}`;
                 const termEl = document.createElement("span");
                 termEl.className = "term";
                 termEl.style.anchorName = termAnchorName;
-                termEl.textContent = expanded[0];
+                termEl.textContent = expandedDefinition[0];
                 termEl.onclick = () => {
                     this.sourceButton.onclick = () => {
                         this.sourceLabel.textContent = rawDefinition;
@@ -288,9 +241,10 @@ class UI {
                     this.controlPopover.style.left = `anchor(${termAnchorName} left)`;
                     this._showPopover(this.controlPopover);
                 }
+
                 li.prepend(termEl);
 
-                if (dictionaryEntry.isMute) {
+                if (definition.isMute) {
                     const muteEl = document.createElement("span");
                     muteEl.className = "mute";
                     muteEl.textContent = "*";
@@ -446,6 +400,7 @@ class UI {
             `formResponse?usp=pp_url` +
             `&entry.1299933712=-1` +
             `&entry.1567861638=${term}` +
+            `&entry.1828344261=issue` +
             `&submit=Submit`
         this._openLink(url);
     }
@@ -505,7 +460,7 @@ class State {
     performSearch = () => {
         if (this._selectedSuggestionIndex > -1 && this._suggestions.length > 0 && this._selectedSuggestionIndex < this._suggestions.length) {
             const selectedSuggestion = this._suggestions[this._selectedSuggestionIndex];
-            this.updateSearchQuery(selectedSuggestion.originalTerm);
+            this.updateSearchQuery(selectedSuggestion.term);
         }
 
         const searchResults = [];
@@ -553,11 +508,11 @@ class State {
 
         if (searchQuery.length > 0) {
             const normalizedSearchQuery = Data.normalizeForSearch(searchQuery);
-            for (let i = 0; i < this.data.normalizedTerms.length; i++) {
-                const normalizedTerm = this.data.normalizedTerms[i];
+            for (let i = 0; i < this.data.definitions.length; i++) {
+                const definition = this.data.definitions[i];
+                const normalizedTerm = definition.normalizedTerm;
                 if (normalizedTerm.startsWith(normalizedSearchQuery)) {
-                    let definitions = this.data.definitions.get(normalizedTerm);
-                    suggestions.push(...definitions);
+                    suggestions.push(definition);
                     if (suggestions.length >= 12) {
                         break;
                     }
@@ -602,7 +557,7 @@ class State {
         this.writeHistoryToPersistence();
     }
     writeHistoryToPersistence = () => {
-        localStorage.setItem("searchHistory", JSON.stringify(this._searchHistory.slice(0, 100)));
+        localStorage.setItem("searchHistory", JSON.stringify(this._searchHistory.slice(0, 25)));
     }
     readHistoryFromPersistence = () => {
         const history = localStorage.getItem("searchHistory");
