@@ -1,22 +1,25 @@
 const CORRECTED_DEFINITIONS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQLq5WSntmnMpg4_kpAXlP5z-knal1u_aYpcqCk-6SxbHnx8fw6ddWwsES7D2cwSCTpj1TrrerCsU8j/pub?gid=25454357&single=true&output=tsv";
 const IGNORED_KEYS = new Set(["Tab", "Shift", "Control", "Alt", "Meta", "CapsLock", "ArrowLeft", "ArrowRight"]);
 
-class TermEntry {
-    normalizedTerm;
-    originalTerm;
+class DictionaryEntry {
+    definition;
     isMute;
-    defs;
+    term;
+    normalizedTerm;
 
-    constructor(normalizedTerm, originalTerm, isMute, defs) {
-        this.normalizedTerm = normalizedTerm;
-        this.originalTerm = originalTerm;
-        this.isMute = isMute;
-        this.defs = defs;
+    constructor(definition) {
+        this.definition = definition;
+
+        const _term = definition.substring(3, definition.indexOf("</B>"));
+        this.isMute = _term.startsWith("*");
+        this.term = _term.replace("*", "");
+
+        this.normalizedTerm = Data.normalizeForSearch(this.term);
     }
 }
 
 class Data {
-    definitions = new Map(); // { normalizedTerm : TermEntry }
+    definitions = new Map(); // { normalizedTerm : DictionaryEntry }
     normalizedTerms = []; // [ normalizedTerm ]
 
     initialize = async () => {
@@ -33,15 +36,15 @@ class Data {
     generateSearchResults = (query, shouldLookInside) => {
         const results = [];
         const isShortQuery = query.length <= 2;
-        this.definitions.forEach((termEntry, normalizedTerm) => {
+        this.definitions.forEach((terms, normalizedTerm) => {
             let found = false;
             if (isShortQuery) {
                 found = normalizedTerm === query;
 
             } else if (shouldLookInside) {
-                for (let i = 0; i < termEntry.defs.length; i++) {
-                    let def = termEntry.defs[i];
-                    let normalizedDef = Data.normalizeForSearch(def);
+                for (let i = 0; i < terms.length; i++) {
+                    let term = terms[i];
+                    let normalizedDef = Data.normalizeForSearch(term.definition);
                     let textOnlyDef = normalizedDef.replace(/<[^>]*>/g, "");
                     if (textOnlyDef.includes(query)) {
                         found = true;
@@ -53,7 +56,7 @@ class Data {
             }
 
             if (found) {
-                results.push(termEntry);
+                results.push(...terms);
             }
         });
         return results;
@@ -64,135 +67,18 @@ class Data {
     _readBaseDictionaryData = () => {
         ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
             .flatMap(letter => FR_DATA[letter])
-            .forEach((def, index) => {
-                if (def !== undefined && def.startsWith("<B>")) {
-                    const term = def.substring(3, def.indexOf("</B>"));
-                    const isMute = term.startsWith("*");
-
-                    const normalizedTerm = Data.normalizeForSearch(term).replace("*", "");
-                    const originalTerm = term.replace("*", "");
-                    let termEntry = this.definitions.get(normalizedTerm);
-                    if (termEntry === undefined) {
-                        termEntry = new TermEntry(normalizedTerm, originalTerm, isMute, []);
-                        this.definitions.set(normalizedTerm, termEntry);
+            .forEach((rawDefinition, index) => {
+                if (rawDefinition !== undefined && rawDefinition.startsWith("<B>")) {
+                    const dictionaryEntry = new DictionaryEntry(rawDefinition);
+                    const normalizedTerm = dictionaryEntry.normalizedTerm;
+                    let definitions = this.definitions.get(normalizedTerm);
+                    if (definitions === undefined) {
+                        definitions = [];
+                        this.definitions.set(normalizedTerm, definitions);
                     }
-                    termEntry.defs.push(def);
-                    // if (index < 300)
-                    {
-                        // this._checkTilda(originalTerm, def);
-                        // this._checkNumbering(originalTerm, def);
-                    }
+                    definitions.push(dictionaryEntry);
                 }
             });
-    }
-
-    _checkNumbering = (term, def) => {
-        const simpleDef = def
-            .replaceAll("<BR>", "")
-            .replaceAll("<B>", "╠")
-            .replaceAll("</B>", "▐")
-            .replaceAll("<I>", "►")
-            .replaceAll("</I>", "◄");
-
-        let bStarts = [];
-        let bEnds = [];
-        let iStarts = [];
-        let iEnds = [];
-
-        for (let i = 0; i < simpleDef.length; i++) {
-            const c = simpleDef.charAt(i);
-            if (c === "╠") {
-                bStarts.push(i);
-            }
-            if (c === "▐") {
-                bEnds.push(i);
-            }
-            if (c === "►") {
-                iStarts.push(i);
-            }
-            if (c === "◄") {
-                iEnds.push(i);
-            }
-        }
-
-        if (bStarts.length === bEnds.length) {
-            for (let i = 0; i < bStarts.length - 1; i++) {
-                const start = bEnds[i];
-                const end = bStarts[i + 1];
-                const nonBoldText = simpleDef.substring(start, end);
-                if (nonBoldText === "II.") {
-                    console.log("Invalid definition ROMAN:", term, nonBoldText, start, end);
-                    return;
-                }
-            }
-        }
-    }
-
-    _checkTilda(term, def) {
-        const simpleDef = def
-            .replaceAll("<BR>", "")
-            .replaceAll("<B>", "╠")
-            .replaceAll("</B>", "▐")
-            .replaceAll("<I>", "►")
-            .replaceAll("</I>", "◄");
-        // console.log(simpleDef);
-
-        let bStarts = [];
-        let bEnds = [];
-        let iStarts = [];
-        let iEnds = [];
-
-        for (let i = 0; i < simpleDef.length; i++) {
-            const c = simpleDef.charAt(i);
-            if (c === "╠") {
-                bStarts.push(i);
-            }
-            if (c === "▐") {
-                bEnds.push(i);
-            }
-            if (c === "►") {
-                iStarts.push(i);
-            }
-            if (c === "◄") {
-                iEnds.push(i);
-            }
-        }
-
-        if (bStarts.length === bEnds.length) {
-            for (let i = 0; i < bStarts.length; i++) {
-                const start = bEnds[i];
-                const end = i < bStarts.length ? bStarts[i + 1] : def.length;
-                const nonBoldText = simpleDef.substring(start + 1, end);
-                if (nonBoldText.indexOf("~") > -1) {
-                    console.log("Invalid definition TILDA:", term, nonBoldText, start, end);
-                    return;
-                }
-            }
-        }
-
-        if (bStarts.length === bEnds.length) {
-            for (let i = 0; i < bStarts.length; i++) {
-                const bStart = bStarts[i];
-                const bEnd = bEnds[i];
-                if (bStart >= bEnd) {
-                    console.error("Invalid definition BOLD:", term, simpleDef, bStart, bEnd, def.substring(bEnd, bStart));
-                    return;
-                }
-            }
-        } else {
-            console.error("Invalid definition:", def, simpleDef, bStarts, bEnds);
-        }
-
-        if (iStarts.length === iEnds.length) {
-            for (let i = 0; i < iStarts.length; i++) {
-                const iStart = iStarts[i];
-                const iEnd = iEnds[i];
-                if (iStart >= iEnd) {
-                    console.error("Invalid definition ITALIC:", def, simpleDef, iStart, iEnd, def.substring(iEnd, iStart));
-                    return;
-                }
-            }
-        }
     }
 
     _readTextData = async (url) => {
@@ -215,12 +101,12 @@ class Data {
             const parts = line.split("\t");
             if (parts.length >= 4) {
                 try {
-                    const term = parts[1];
-                    const index = parts[2];
-                    const correctedDef = parts[3];
-                    const entry = this.definitions.get(term);
-                    if (entry !== undefined && correctedDef !== undefined && correctedDef.length > 0) {
-                        entry.defs[index] = correctedDef;
+                    const normalizedTerm = parts[1];
+                    const termIndex = parts[2];
+                    const correctedRawDefinition = parts[3];
+                    const definitions = this.definitions.get(normalizedTerm);
+                    if (definitions !== undefined && correctedRawDefinition !== undefined && correctedRawDefinition.length > 0) {
+                        definitions[termIndex] = new DictionaryEntry(correctedRawDefinition);
                         console.log("Stored correction:", parts);
                     }
                 } catch (e) {
@@ -303,7 +189,7 @@ class UI {
         //
 
         this.searchInput.addEventListener("keyup", this._processSearchInput);
-        this.searchInput.addEventListener("mouseenter", () => {
+        this.searchInput.addEventListener("focus", () => {
             this._selectSearchInputText();
         });
         document.addEventListener("visibilitychange", () => {
@@ -331,12 +217,12 @@ class UI {
             }
 
             this.suggestionsList.textContent = "";
-            suggestedTermEntries.forEach((termEntry) => {
+            suggestedTermEntries.forEach((dictionaryEntry) => {
                 const li = document.createElement("li");
-                li.title = termEntry.originalTerm;
-                li.innerHTML = termEntry.defs.join("\n").replaceAll("<BR>", " ");
+                li.title = dictionaryEntry.term;
+                li.innerHTML = dictionaryEntry.definition.replaceAll("<BR>", " ");
                 li.onclick = () => {
-                    this.state.updateSearchQuery(termEntry.originalTerm);
+                    this.state.updateSearchQuery(dictionaryEntry.term);
                     this.state.performSearch();
                     this.state.updateHistory();
                 };
@@ -358,61 +244,60 @@ class UI {
             this.resultList.textContent = "";
 
             let count = 0;
-            searchResults.forEach((termEntry) => {
-                const normalizedTerm = termEntry.normalizedTerm;
-                const originalTerm = termEntry.originalTerm;
-                termEntry.defs.forEach((def, index) => {
-                    count++;
-                    const li = document.createElement("li");
-                    const expanded = this.state.data._expandDef(originalTerm, def);
-                    li.innerHTML = expanded[1];
+            searchResults.forEach((dictionaryEntry) => {
+                count++;
+                const normalizedTerm = dictionaryEntry.normalizedTerm;
+                const originalTerm = dictionaryEntry.term;
+                const rawDefinition = dictionaryEntry.definition;
+                const li = document.createElement("li");
+                const expanded = this.state.data._expandDef(originalTerm, dictionaryEntry.definition);
+                li.innerHTML = expanded[1];
 
-                    const termAnchorName = `--anchor_term_${count}`;
-                    const termEl = document.createElement("span");
-                    termEl.className = "term";
-                    termEl.style.anchorName = termAnchorName;
-                    termEl.textContent = expanded[0];
-                    termEl.onclick = () => {
-                        this.sourceButton.onclick = () => {
-                            this.sourceLabel.textContent = def;
-                            this._showPopover(this.sourcePopover);
-                        }
-                        this.reportButton.onclick = () => {
-                            this._reportDefinition(encodeURIComponent(normalizedTerm), encodeURIComponent(index));
-                            this._hidePopover(this.controlPopover);
-                        };
-
-                        const commaIndex = originalTerm.indexOf(",");
-                        const searchTerm = commaIndex > -1 ? originalTerm.substring(0, originalTerm.indexOf(",")) : originalTerm;
-                        this.littreButton.onclick = () => {
-                            this._hidePopover(this.controlPopover);
-                            this._openLink(`https://www.littre.org/definition/${searchTerm}`);
-                        }
-                        this.cnrtlButton.onclick = () => {
-                            this._hidePopover(this.controlPopover);
-                            this._openLink(`https://www.cnrtl.fr/definition/${searchTerm}`);
-                        }
-                        this.wiktionaryButton.onclick = () => {
-                            this._hidePopover(this.controlPopover);
-                            this._openLink(`https://fr.wiktionary.org/wiki/${searchTerm}`);
-                        }
-
-                        this.controlPopover.style.positionAnchor = termAnchorName;
-                        this.controlPopover.style.top = `anchor(${termAnchorName} bottom)`;
-                        this.controlPopover.style.left = `anchor(${termAnchorName} left)`;
-                        this._showPopover(this.controlPopover);
+                const termAnchorName = `--anchor_term_${count}`;
+                const termEl = document.createElement("span");
+                termEl.className = "term";
+                termEl.style.anchorName = termAnchorName;
+                termEl.textContent = expanded[0];
+                termEl.onclick = () => {
+                    this.sourceButton.onclick = () => {
+                        this.sourceLabel.textContent = rawDefinition;
+                        this._showPopover(this.sourcePopover);
                     }
-                    li.prepend(termEl);
+                    this.reportButton.onclick = () => {
+                        this._reportDefinition(encodeURIComponent(normalizedTerm));
+                        this._hidePopover(this.controlPopover);
+                    };
 
-                    if (termEntry.isMute) {
-                        const muteEl = document.createElement("span");
-                        muteEl.className = "mute";
-                        muteEl.textContent = "*";
-                        li.prepend(muteEl);
+                    const commaIndex = originalTerm.indexOf(",");
+                    const searchTerm = commaIndex > -1 ? originalTerm.substring(0, originalTerm.indexOf(",")) : originalTerm;
+                    this.littreButton.onclick = () => {
+                        this._hidePopover(this.controlPopover);
+                        this._openLink(`https://www.littre.org/definition/${searchTerm}`);
+                    }
+                    this.cnrtlButton.onclick = () => {
+                        this._hidePopover(this.controlPopover);
+                        this._openLink(`https://www.cnrtl.fr/definition/${searchTerm}`);
+                    }
+                    this.wiktionaryButton.onclick = () => {
+                        this._hidePopover(this.controlPopover);
+                        this._openLink(`https://fr.wiktionary.org/wiki/${searchTerm}`);
                     }
 
-                    this.resultList.appendChild(li);
-                });
+                    this.controlPopover.style.positionAnchor = termAnchorName;
+                    this.controlPopover.style.top = `anchor(${termAnchorName} bottom)`;
+                    this.controlPopover.style.left = `anchor(${termAnchorName} left)`;
+                    this._showPopover(this.controlPopover);
+                }
+                li.prepend(termEl);
+
+                if (dictionaryEntry.isMute) {
+                    const muteEl = document.createElement("span");
+                    muteEl.className = "mute";
+                    muteEl.textContent = "*";
+                    li.prepend(muteEl);
+                }
+
+                this.resultList.appendChild(li);
             });
 
             this._selectSearchInputText();
@@ -556,8 +441,12 @@ class UI {
         open(url, "_blank")
     }
 
-    _reportDefinition(term, index) {
-        const url = `https://docs.google.com/forms/d/e/1FAIpQLSfvDmSBcWPNiWHgPTWqXRikONgijGEXMPUtHloRQuVCZ8Q2wQ/` + `formResponse?usp=pp_url` + `&entry.1299933712=${index}` + `&entry.1567861638=${term}` + `&submit=Submit`
+    _reportDefinition(term) {
+        const url = `https://docs.google.com/forms/d/e/1FAIpQLSfvDmSBcWPNiWHgPTWqXRikONgijGEXMPUtHloRQuVCZ8Q2wQ/` +
+            `formResponse?usp=pp_url` +
+            `&entry.1299933712=-1` +
+            `&entry.1567861638=${term}` +
+            `&submit=Submit`
         this._openLink(url);
     }
 }
@@ -667,8 +556,8 @@ class State {
             for (let i = 0; i < this.data.normalizedTerms.length; i++) {
                 const normalizedTerm = this.data.normalizedTerms[i];
                 if (normalizedTerm.startsWith(normalizedSearchQuery)) {
-                    let termEntry = this.data.definitions.get(normalizedTerm);
-                    suggestions.push(termEntry);
+                    let definitions = this.data.definitions.get(normalizedTerm);
+                    suggestions.push(...definitions);
                     if (suggestions.length >= 12) {
                         break;
                     }
