@@ -42,7 +42,7 @@ class Data {
                 found = definition.normalizedTerm === query;
 
             } else if (shouldLookInside) {
-                const normalizedDefinition = Data.normalizeForSearch(definition.definition);
+                const normalizedDefinition = Data.normalizeForSearch(definition.rawDefinition);
                 const textOnlyDefinition = normalizedDefinition.replace(/<[^>]*>/g, "");
                 found = textOnlyDefinition.includes(query);
 
