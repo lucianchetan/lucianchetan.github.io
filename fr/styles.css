@@ -3,7 +3,7 @@
     --color-background-secondary: #FAFAFA;
     --color-background-header: #F4F4F4;
     --color-background-selection: dodgerblue;
-    --color-background-highlight: rgba(255, 187, 0, 0.5);
+    --color-background-highlight: #0f549918;
 
     --color-text-primary: #111;
     --color-text-secondary: rgba(0, 0, 0, 0.50);
@@ -30,7 +30,7 @@
         --color-background-secondary: #212121;
         --color-background-header: #2D2D2D;
         --color-background-selection: #0078D4;
-        --color-background-highlight: rgba(255, 187, 0, 0.3);
+        --color-background-highlight: #99c7ff38;
 
         --color-text-primary: #EEE;
         --color-text-secondary: rgba(255, 255, 255, 0.50);
@@ -170,6 +170,10 @@ footer {
 }
 
 #resultList li u {
+    text-decoration: none;
+    padding-inline: 0.125rem;
+    background-color: var(--color-background-highlight);
+    border-bottom: 2px dotted var(--color-text-bold);
 }
 
 #sourcePopover {

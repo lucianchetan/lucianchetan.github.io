@@ -302,12 +302,19 @@ class UI {
         }
     }
 
+    _performSearch = () => {
+        const searchQuery = this.searchInput.value.trim();
+        if (searchQuery.length > 0) {
+            this.state.updateSearchQuery(searchQuery);
+            this.state.performSearch();
+            this.state.updateHistory();
+        }
+    }
+
     _processSearchInput = (event) => {
         const key = event.key;
         if (key === "Enter") {
-            this.state.updateSearchQuery(this.searchInput.value.trim());
-            this.state.performSearch();
-            this.state.updateHistory();
+            this._performSearch();
         } else if (key === "ArrowUp") {
             this.state.selectPreviousSuggestion();
         } else if (key === "ArrowDown") {
@@ -321,7 +328,7 @@ class UI {
 
     _processLookInsideToggleButton = (event) => {
         this.state.toggleLookInside();
-        this.state.performSearch();
+        this._performSearch();
     }
 
     _selectSearchInputText = () => {
