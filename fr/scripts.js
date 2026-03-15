@@ -69,14 +69,6 @@ class Data {
             });
     }
 
-    _expandDefinition = (originalTerm, definition) => {
-        const commaIndex = originalTerm.indexOf(",");
-        const subterm = (commaIndex > -1 ? originalTerm.substring(0, commaIndex) : originalTerm)
-            .replace("*", "");
-        const subdef = definition.substring(definition.indexOf("</B>") + 4);
-        return [originalTerm.replaceAll("~", subterm), subdef.replaceAll("~", `<U>${subterm}</U>`)];
-    }
-
     static normalizeForSearch = (input) => {
         return input
             .toLowerCase()
@@ -115,7 +107,7 @@ class UI {
     sourceLabel;
     historyList;
     clearHistoryButton;
-    highlightsToggleButton;
+    // highlightsToggleButton;
 
     constructor(state) {
         this.state = state;
@@ -137,7 +129,7 @@ class UI {
         this.sourceLabel = document.getElementById("sourceLabel");
         this.historyList = document.getElementById("historyList");
         this.clearHistoryButton = document.getElementById("clearHistoryButton");
-        this.highlightsToggleButton = document.getElementById("highlightsToggleButton");
+        // this.highlightsToggleButton = document.getElementById("highlightsToggleButton");
 
         //
 
@@ -153,7 +145,7 @@ class UI {
 
         this.lookInsideToggleButton.addEventListener("click", this._processLookInsideToggleButton);
         this.clearHistoryButton.addEventListener("click", this.state.clearHistory);
-        this.highlightsToggleButton.addEventListener("click", this.state.toggleHighlights)
+        // this.highlightsToggleButton.addEventListener("click", this.state.toggleHighlights)
 
         // state handlers
         this.state.onUpdatedSearchQuery = (searchQuery) => {
@@ -189,9 +181,9 @@ class UI {
             }
         }
         this.state.onUpdatedSearchResults = (searchResults) => {
-            if (this.state._highlightsEnabled) {
-                this._cleanupHighlights();
-            }
+            // if (this.state._highlightsEnabled) {
+            //     this._cleanupHighlights();
+            // }
 
             this.resultList.scrollTo(0, 0);
             this.resultList.textContent = "";
@@ -256,9 +248,9 @@ class UI {
 
             this._selectSearchInputText();
 
-            if (this.state._highlightsEnabled) {
-                this._generateHighlights();
-            }
+            // if (this.state._highlightsEnabled) {
+            //     this._generateHighlights();
+            // }
         }
         this.state.onRestoredHistory = (history) => {
             history.forEach((query) => {
@@ -292,14 +284,14 @@ class UI {
             this.historyList.removeChild(li);
             this.historyList.prepend(li);
         }
-        this.state.onUpdatedHighlights = (highlights) => {
-            this.highlightsToggleButton.classList.toggle("selected", highlights);
-            if (highlights) {
-                this._generateHighlights();
-            } else {
-                this._cleanupHighlights();
-            }
-        }
+        // this.state.onUpdatedHighlights = (highlights) => {
+        //     this.highlightsToggleButton.classList.toggle("selected", highlights);
+        //     if (highlights) {
+        //         this._generateHighlights();
+        //     } else {
+        //         this._cleanupHighlights();
+        //     }
+        // }
     }
 
     _performSearch = () => {
@@ -336,49 +328,49 @@ class UI {
         this.searchInput.select();
     }
 
-    _generateHighlights = () => {
-        const query = this.state._searchQuery;
+    // _generateHighlights = () => {
+    //     const query = this.state._searchQuery;
+    //
+    //     const ranges = [];
+    //     if (CSS && CSS.highlights && query.length >= 2) {
+    //         const treeWalker = document.createTreeWalker(this.resultList, NodeFilter.SHOW_TEXT);
+    //         const textNodes = [];
+    //         let currentNode = treeWalker.nextNode();
+    //         while (currentNode) {
+    //             textNodes.push(currentNode);
+    //             currentNode = treeWalker.nextNode();
+    //         }
+    //
+    //         const normalizedQuery = Data.normalizeForHighlighting(query);
+    //
+    //         textNodes.forEach((node) => {
+    //             const text = Data.normalizeForHighlighting(node.textContent);
+    //             let startPos = 0;
+    //             while (startPos < text.length) {
+    //                 const index = text.indexOf(normalizedQuery, startPos);
+    //                 if (index === -1) {
+    //                     break;
+    //                 }
+    //                 const range = new Range();
+    //                 range.setStart(node, index);
+    //                 range.setEnd(node, index + normalizedQuery.length);
+    //                 if (!range.collapsed) {
+    //                     ranges.push(range);
+    //                 }
+    //                 startPos = index + normalizedQuery.length;
+    //             }
+    //         });
+    //         const searchResultsHighlight = new Highlight(...ranges);
+    //         CSS.highlights.set("search-results", searchResultsHighlight);
+    //     }
+    //     return ranges.length;
+    // }
 
-        const ranges = [];
-        if (CSS && CSS.highlights && query.length >= 2) {
-            const treeWalker = document.createTreeWalker(this.resultList, NodeFilter.SHOW_TEXT);
-            const textNodes = [];
-            let currentNode = treeWalker.nextNode();
-            while (currentNode) {
-                textNodes.push(currentNode);
-                currentNode = treeWalker.nextNode();
-            }
-
-            const normalizedQuery = Data.normalizeForHighlighting(query);
-
-            textNodes.forEach((node) => {
-                const text = Data.normalizeForHighlighting(node.textContent);
-                let startPos = 0;
-                while (startPos < text.length) {
-                    const index = text.indexOf(normalizedQuery, startPos);
-                    if (index === -1) {
-                        break;
-                    }
-                    const range = new Range();
-                    range.setStart(node, index);
-                    range.setEnd(node, index + normalizedQuery.length);
-                    if (!range.collapsed) {
-                        ranges.push(range);
-                    }
-                    startPos = index + normalizedQuery.length;
-                }
-            });
-            const searchResultsHighlight = new Highlight(...ranges);
-            CSS.highlights.set("search-results", searchResultsHighlight);
-        }
-        return ranges.length;
-    }
-
-    _cleanupHighlights = () => {
-        if (CSS && CSS.highlights) {
-            CSS.highlights.clear();
-        }
-    }
+    // _cleanupHighlights = () => {
+    //     if (CSS && CSS.highlights) {
+    //         CSS.highlights.clear();
+    //     }
+    // }
 
     _showPopover = (popover) => {
         if (!popover) {
@@ -425,7 +417,7 @@ class State {
 
     _searchHistory = [];
 
-    _highlightsEnabled = false;
+    // _highlightsEnabled = false;
 
     constructor(data) {
         this.data = data;
@@ -450,8 +442,8 @@ class State {
     }
     onReusedHistory = (index) => {
     }
-    onUpdatedHighlights = (highlights) => {
-    }
+    // onUpdatedHighlights = (highlights) => {
+    // }
 
     // search
     updateSearchQuery = (query) => {
@@ -538,10 +530,10 @@ class State {
     }
 
     // highlights
-    toggleHighlights = () => {
-        this._highlightsEnabled = !this._highlightsEnabled;
-        this.onUpdatedHighlights(this._highlightsEnabled);
-    }
+    // toggleHighlights = () => {
+    //     this._highlightsEnabled = !this._highlightsEnabled;
+    //     this.onUpdatedHighlights(this._highlightsEnabled);
+    // }
 
     // history
     clearHistory = () => {

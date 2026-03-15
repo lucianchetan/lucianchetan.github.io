@@ -321,9 +321,9 @@ ul.controlList li {
     color: var(--color-text-selection);
 }
 
-::highlight(search-results) {
-    background-color: var(--color-background-highlight);
-}
+/*::highlight(search-results) {*/
+/*    background-color: var(--color-background-highlight);*/
+/*}*/
 
 ::selection {
     color: var(--color-text-selection);
