@@ -321,10 +321,6 @@ ul.controlList li {
     color: var(--color-text-selection);
 }
 
-/*::highlight(search-results) {*/
-/*    background-color: var(--color-background-highlight);*/
-/*}*/
-
 ::selection {
     color: var(--color-text-selection);
     background-color: var(--color-background-selection);
@@ -355,4 +351,25 @@ ul.controlList li {
     width: 1px;
     height: 24px;
     background-color: var(--color-separator);
+}
+
+ol.main {
+    list-style-type: upper-roman;
+}
+
+ol.subpart {
+    list-style-type: decimal;
+}
+
+li.part {
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-top: 0.5rem !important;
+    text-indent: 0 !important;
+    border: none !important;
+}
+
+li.part::marker {
+    color: var(--color-text-bold);
+    font-weight: bold;
 }

@@ -2,6 +2,8 @@ const IGNORED_KEYS = new Set(["Tab", "Shift", "Control", "Alt", "Meta", "CapsLoc
 
 class Definition {
     rawDefinition;
+    displayDefinition;
+    displayTerm;
     isMute;
     term;
     normalizedTerm;
@@ -9,20 +11,49 @@ class Definition {
     constructor(rawDefinition) {
         this.rawDefinition = rawDefinition;
 
-        const _term = rawDefinition.substring(3, rawDefinition.indexOf("</B>"));
-        this.isMute = _term.startsWith("*");
-        this.term = _term.replace("*", "");
+        const rawTerm = rawDefinition.substring(3, rawDefinition.indexOf("</B>"));
+        this.isMute = rawTerm.startsWith("*");
+        this.term = rawTerm.replace("*", "");
 
+        const commaIndex = rawTerm.indexOf(",");
+        const mainTerm = (commaIndex > -1 ? rawTerm.substring(0, commaIndex) : rawTerm)
+            .replace("*", "");
+        const definitionValue = rawDefinition.substring(rawDefinition.indexOf("</B>") + 4);
+
+        this.displayDefinition = this._generateDisplayDefinition(mainTerm, definitionValue);
+        this.displayTerm = this.term.replaceAll("~", `${mainTerm}`);
         this.normalizedTerm = Data.normalizeForSearch(this.term);
     }
 
-    expand = () => {
-        const commaIndex = this.term.indexOf(",");
-        const subterm = (commaIndex > -1 ? this.term.substring(0, commaIndex) : this.term)
-            .replace("*", "");
-        const subdef = this.rawDefinition.substring(this.rawDefinition.indexOf("</B>") + 4);
-        return [this.term.replaceAll("~", subterm), subdef.replaceAll("~", `<U>${subterm}</U>`)];
-    };
+    _generateDisplayDefinition = (mainTerm, definitionValue) => {
+        const expandedDefinitionValue = definitionValue.replaceAll("~", `<U>${mainTerm}</U>`);
+        const mainParts = expandedDefinitionValue
+            .split(/<B>V?I*V?\.<\/B>/g);
+        if (mainParts.length === 1) {
+            return this._processPart(expandedDefinitionValue);
+        } else {
+            return mainParts[0] +
+                ` <ol class="main">` +
+                mainParts.slice(1).map(entry => `<li class="part">${this._processPart(entry)}</li>`).join(" ") +
+                `</ol>`;
+        }
+    }
+
+    _processPart = (entry) => {
+        const parts = entry.split(/<B>\d*\.<\/B>/g);
+        if (parts.length === 1) {
+            return entry;
+        }
+        if (entry.startsWith("1.")) {
+            return `<ol class="subpart">` +
+                parts.map(part => `<li class="part">${part}</li>`).join(" ") +
+                `</ol>`;
+        } else {
+            return parts[0] + ` <ol class="subpart">` +
+                parts.slice(1).map(part => `<li class="part">${part}</li>`).join(" ") +
+                `</ol>`;
+        }
+    }
 }
 
 class Data {
@@ -35,19 +66,20 @@ class Data {
 
     generateSearchResults = (query, shouldLookInside) => {
         const results = [];
-        const isShortQuery = query.length <= 2;
+        const normalizedQuery = Data.normalizeForSearch(query);
+        const isShortQuery = normalizedQuery.length <= 1;
         this.definitions.forEach(definition => {
             let found = false;
             if (isShortQuery) {
-                found = definition.normalizedTerm === query;
+                found = definition.normalizedTerm === normalizedQuery;
 
             } else if (shouldLookInside) {
                 const normalizedDefinition = Data.normalizeForSearch(definition.rawDefinition);
                 const textOnlyDefinition = normalizedDefinition.replace(/<[^>]*>/g, "");
-                found = textOnlyDefinition.includes(query);
+                found = textOnlyDefinition.includes(normalizedQuery);
 
             } else {
-                found = definition.normalizedTerm.startsWith(query);
+                found = definition.normalizedTerm.startsWith(normalizedQuery);
             }
 
             if (found) {
@@ -77,17 +109,8 @@ class Data {
             .replaceAll('ç', 'c')
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
-            .replaceAll(",", "")
+            // .replaceAll(",", "")
             .replaceAll("'", "");
-    }
-
-    static normalizeForHighlighting = (input) => {
-        return input
-            .toLowerCase()
-            .replaceAll('ae', 'æ')
-            .replaceAll('oe', 'œ')
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
     }
 }
 
@@ -107,7 +130,6 @@ class UI {
     sourceLabel;
     historyList;
     clearHistoryButton;
-    // highlightsToggleButton;
 
     constructor(state) {
         this.state = state;
@@ -129,7 +151,6 @@ class UI {
         this.sourceLabel = document.getElementById("sourceLabel");
         this.historyList = document.getElementById("historyList");
         this.clearHistoryButton = document.getElementById("clearHistoryButton");
-        // this.highlightsToggleButton = document.getElementById("highlightsToggleButton");
 
         //
 
@@ -145,7 +166,6 @@ class UI {
 
         this.lookInsideToggleButton.addEventListener("click", this._processLookInsideToggleButton);
         this.clearHistoryButton.addEventListener("click", this.state.clearHistory);
-        // this.highlightsToggleButton.addEventListener("click", this.state.toggleHighlights)
 
         // state handlers
         this.state.onUpdatedSearchQuery = (searchQuery) => {
@@ -165,7 +185,7 @@ class UI {
             suggestedTermEntries.forEach((definition) => {
                 const li = document.createElement("li");
                 li.title = definition.term;
-                li.innerHTML = definition.rawDefinition.replaceAll("<BR>", " ");
+                li.innerHTML = definition.rawDefinition;
                 li.onclick = () => {
                     this.state.updateSearchQuery(definition.term);
                     this.state.performSearch();
@@ -181,10 +201,6 @@ class UI {
             }
         }
         this.state.onUpdatedSearchResults = (searchResults) => {
-            // if (this.state._highlightsEnabled) {
-            //     this._cleanupHighlights();
-            // }
-
             this.resultList.scrollTo(0, 0);
             this.resultList.textContent = "";
 
@@ -194,15 +210,15 @@ class UI {
                 const normalizedTerm = definition.normalizedTerm;
                 const originalTerm = definition.term;
                 const rawDefinition = definition.rawDefinition;
+                const displayDefinition = definition.displayDefinition;
                 const li = document.createElement("li");
-                const expandedDefinition = definition.expand();
-                li.innerHTML = expandedDefinition[1];
+                li.innerHTML = displayDefinition;
 
                 const termAnchorName = `--anchor_term_${count}`;
                 const termEl = document.createElement("span");
                 termEl.className = "term";
                 termEl.style.anchorName = termAnchorName;
-                termEl.textContent = expandedDefinition[0];
+                termEl.textContent = definition.displayTerm;
                 termEl.onclick = () => {
                     this.sourceButton.onclick = () => {
                         this.sourceLabel.textContent = rawDefinition;
@@ -247,10 +263,6 @@ class UI {
             });
 
             this._selectSearchInputText();
-
-            // if (this.state._highlightsEnabled) {
-            //     this._generateHighlights();
-            // }
         }
         this.state.onRestoredHistory = (history) => {
             history.forEach((query) => {
@@ -284,14 +296,6 @@ class UI {
             this.historyList.removeChild(li);
             this.historyList.prepend(li);
         }
-        // this.state.onUpdatedHighlights = (highlights) => {
-        //     this.highlightsToggleButton.classList.toggle("selected", highlights);
-        //     if (highlights) {
-        //         this._generateHighlights();
-        //     } else {
-        //         this._cleanupHighlights();
-        //     }
-        // }
     }
 
     _performSearch = () => {
@@ -327,50 +331,6 @@ class UI {
         this.searchInput.focus();
         this.searchInput.select();
     }
-
-    // _generateHighlights = () => {
-    //     const query = this.state._searchQuery;
-    //
-    //     const ranges = [];
-    //     if (CSS && CSS.highlights && query.length >= 2) {
-    //         const treeWalker = document.createTreeWalker(this.resultList, NodeFilter.SHOW_TEXT);
-    //         const textNodes = [];
-    //         let currentNode = treeWalker.nextNode();
-    //         while (currentNode) {
-    //             textNodes.push(currentNode);
-    //             currentNode = treeWalker.nextNode();
-    //         }
-    //
-    //         const normalizedQuery = Data.normalizeForHighlighting(query);
-    //
-    //         textNodes.forEach((node) => {
-    //             const text = Data.normalizeForHighlighting(node.textContent);
-    //             let startPos = 0;
-    //             while (startPos < text.length) {
-    //                 const index = text.indexOf(normalizedQuery, startPos);
-    //                 if (index === -1) {
-    //                     break;
-    //                 }
-    //                 const range = new Range();
-    //                 range.setStart(node, index);
-    //                 range.setEnd(node, index + normalizedQuery.length);
-    //                 if (!range.collapsed) {
-    //                     ranges.push(range);
-    //                 }
-    //                 startPos = index + normalizedQuery.length;
-    //             }
-    //         });
-    //         const searchResultsHighlight = new Highlight(...ranges);
-    //         CSS.highlights.set("search-results", searchResultsHighlight);
-    //     }
-    //     return ranges.length;
-    // }
-
-    // _cleanupHighlights = () => {
-    //     if (CSS && CSS.highlights) {
-    //         CSS.highlights.clear();
-    //     }
-    // }
 
     _showPopover = (popover) => {
         if (!popover) {
@@ -417,8 +377,6 @@ class State {
 
     _searchHistory = [];
 
-    // _highlightsEnabled = false;
-
     constructor(data) {
         this.data = data;
     }
@@ -442,8 +400,6 @@ class State {
     }
     onReusedHistory = (index) => {
     }
-    // onUpdatedHighlights = (highlights) => {
-    // }
 
     // search
     updateSearchQuery = (query) => {
@@ -464,9 +420,8 @@ class State {
 
         const searchResults = [];
         if (this._searchQuery.length >= 1) {
-            const normalizedSearchQuery = Data.normalizeForSearch(this._searchQuery);
-            searchResults.push(...this.data.generateSearchResults(normalizedSearchQuery, this._shouldLookInside));
-            console.log(`Found ${searchResults.length} results for '${this._searchQuery}'`);
+            searchResults.push(...this.data.generateSearchResults(this._searchQuery, this._shouldLookInside));
+            console.log(`Found ${searchResults.length} results for '${this._searchQuery}'`, searchResults.map(e => e.term));
         }
         this._searchResults = searchResults;
 
@@ -528,12 +483,6 @@ class State {
         this._suggestions = [];
         this.onUpdatedSuggestions(this._suggestions);
     }
-
-    // highlights
-    // toggleHighlights = () => {
-    //     this._highlightsEnabled = !this._highlightsEnabled;
-    //     this.onUpdatedHighlights(this._highlightsEnabled);
-    // }
 
     // history
     clearHistory = () => {
