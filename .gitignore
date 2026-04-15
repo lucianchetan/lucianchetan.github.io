@@ -9,3 +9,6 @@ main.*.css
 
 
 # Keep source HTML files - they are not ignored
+
+# Others
+.idea
