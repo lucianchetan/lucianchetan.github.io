@@ -9,6 +9,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,7 +24,9 @@ jobs:
       - name: Inject version
         run: |
           VERSION=$(date +%y%m%d)
-          find . -name "*.html" -not -path "./.git/*" -exec sed -i "s/__VERSION__/$VERSION/g" {} +
+          echo "Injecting version: $VERSION"
+          sed -i "s/__VERSION__/$VERSION/g" fr/index.html
+          grep "$VERSION" fr/index.html || echo "WARNING: version string not found after substitution"
 
       - uses: actions/upload-pages-artifact@v3
         with:
