@@ -352,8 +352,11 @@ ul.controlList li {
     height: 24px;
     background-color: var(--color-separator);
 }
+ol.capital {
+    list-style-type: upper-alpha;
+}
 
-ol.main {
+ol.roman {
     list-style-type: upper-roman;
 }
 

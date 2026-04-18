@@ -27,14 +27,31 @@ class Definition {
 
     _generateDisplayDefinition = (mainTerm, definitionValue) => {
         const expandedDefinitionValue = definitionValue.replaceAll("~", `<U>${mainTerm}</U>`);
-        const mainParts = expandedDefinitionValue
-            .split(/<B>V?I*V?\.<\/B>/g);
-        if (mainParts.length === 1) {
-            return this._processPart(expandedDefinitionValue);
+        return this._processCapitals(expandedDefinitionValue);
+    }
+
+    _processCapitals = (entry) => {
+        const parts = entry
+            .split(/<B>[A-H]\.<\/B>/g);
+        if (parts.length === 1) {
+            return this._processRomanNumerals(entry);
         } else {
-            return mainParts[0] +
-                ` <ol class="main">` +
-                mainParts.slice(1).map(entry => `<li class="part">${this._processPart(entry)}</li>`).join(" ") +
+            return parts[0] +
+                ` <ol class="capital">` +
+                parts.slice(1).map(entry => `<li class="part">${this._processRomanNumerals(entry)}</li>`).join(" ") +
+                `</ol>`;
+        }
+    }
+
+    _processRomanNumerals = (entry) => {
+        const parts = entry
+            .split(/<B>V?I*V?\.<\/B>/g);
+        if (parts.length === 1) {
+            return this._processPart(entry);
+        } else {
+            return parts[0] +
+                ` <ol class="roman">` +
+                parts.slice(1).map(entry => `<li class="part">${this._processPart(entry)}</li>`).join(" ") +
                 `</ol>`;
         }
     }
